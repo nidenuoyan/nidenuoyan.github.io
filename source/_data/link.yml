@@ -1,0 +1,22 @@
+# source/_data/links.yml
+- class_name: 友情链接
+  class_desc: 那些人，那些事
+  link_list:
+    - name: 某某的博客
+      link: https://example.com/
+      avatar: https://example.com/avatar.png
+      descr: 这是一个描述
+      siteshot: https://api.vvhan.com/api/siteshot?url=https://example.com
+
+- class_name: 网站
+  class_desc: 值得推荐的网站
+  link_list:
+    - name: Hexo
+      link: https://hexo.io/
+      avatar: https://hexo.io/favicon.ico
+      descr: 快速、简单且强大的博客框架
+      
+    - name: GitHub
+      link: https://github.com/
+      avatar: https://github.com/favicon.ico
+      descr: 全球最大的代码托管平台

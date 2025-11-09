@@ -1,0 +1,71 @@
+# ================================
+# Hexo 特定文件
+# ================================
+public/          # 生成的静态文件
+.deploy_git/     # 部署缓存
+.db.json         # 数据库缓存
+*.log           # 日志文件
+
+# ================================
+# Node.js 相关
+# ================================
+node_modules/    # 依赖包
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.lock-wscript
+
+# ================================
+# 操作系统文件
+# ================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ================================
+# IDE 和编辑器
+# ================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# 其他编辑器
+*.swp
+*.swo
+*~
+
+# ================================
+# 环境变量
+# ================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ================================
+# 其他
+# ================================
+.cache/
+.nyc_output/
+coverage/
+.nyc_output
+.grunt
