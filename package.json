@@ -6,13 +6,17 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
-    "server": "hexo clean && hexo generate && hexo server"
+    "server": "hexo clean && hexo generate && hexo server",
+    "dev": "set HEXO_URL=http://localhost:4000 && hexo server",
+    "deploy:github": "set HEXO_URL=https://nidenuoyan.github.io && hexo clean && hexo generate && hexo deploy",
+    "deploy:prod": "set HEXO_URL=https://zoengsang.cloud && hexo clean && hexo generate && hexo deploy"
   },
   "hexo": {
     "version": "7.3.0"
   },
   "dependencies": {
     "hexo": "^7.0.0",
+    "hexo-butterfly-extjs": "^1.5.3",
     "hexo-deployer-git": "^4.0.0",
     "hexo-generator-archive": "^2.0.0",
     "hexo-generator-category": "^2.0.0",

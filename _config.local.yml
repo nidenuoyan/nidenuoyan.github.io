@@ -1,0 +1,6 @@
+# _config.local.yml - 开发环境配置
+url: http://localhost:4000
+
+# 可选：开发环境禁用某些功能
+deploy:
+  type: ''  # 开发时不部署
