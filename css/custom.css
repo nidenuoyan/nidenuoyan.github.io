@@ -1,0 +1,38 @@
+/* Power BI图表响应式容器（优化后） */
+.powerbi-responsive {
+  position: relative;
+  width: 100%;
+  max-width: 1400px; /* 宽屏显示更宽 */
+  margin: 30px auto; /* 上下留空更多 */
+  padding-bottom: 65%; /* 高度增加，面积变大（65%≈1.54:1） */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.powerbi-responsive iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.powerbi-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 14px;
+  background-color: #f9f9f9;
+}
+
+/* 覆盖主题内容区宽度限制（按需添加） */
+#content-inner, .container {
+  max-width: 1400px !important;
+}
