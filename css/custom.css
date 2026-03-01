@@ -37,28 +37,13 @@
   max-width: 1400px !important;
 }
 
-/* ========== 代码块字体大小调整（解决汉字大、代码小） ========== */
-/* 针对 Butterfly 主题的代码块样式，强制覆盖默认值 */
-.post-content pre,
-.post-content pre > code {
-  /* 核心：统一代码块内所有字符（代码+汉字）的字体大小 */
-  /* 推荐值：15px（可微调，14-16px 是最舒适的阅读尺寸） */
-  font-size: 15px !important;
-  /* 统一字体：等宽字体（代码工整）+ 微软雅黑（汉字清晰），避免字体错乱 */
-  font-family: Consolas, "Microsoft YaHei", "微软雅黑", monospace !important;
-  /* 调整行高：避免文字挤在一起，1.6 是黄金行高 */
-  line-height: 1.6 !important;
-  /* 可选：代码块内边距，避免文字贴边 */
-  padding: 12px !important;
-}
-
-/* （可选）如果想让汉字比代码略小一点（精准区分），保留这段；否则删掉 */
-.post-content pre code span:lang(zh) {
-  font-size: 14px !important; /* 汉字比代码小 1px，视觉更协调 */
-}
-
-/* （可选）优化代码行号的字体大小，和代码匹配 */
-.post-content .highlight-table .gutter pre {
-  font-size: 15px !important;
-  font-family: Consolas, monospace !important;
+/* 终极适配 hljs 的代码块样式（优先级最高，必生效） */
+.highlight,
+.highlight pre,
+.highlight pre code,
+.post-content .highlight pre,
+.post-content .highlight pre code {
+  font-size: 20px !important; /* 先设20px，肉眼能明显看到变化 */
+  font-family: Consolas, "Microsoft YaHei", monospace !important;
+  line-height: 1.8 !important;
 }
