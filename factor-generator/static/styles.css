@@ -1,4 +1,5 @@
-:root {
+/* 因子生成器专用样式 - 包装在容器内避免冲突 */
+.factor-generator-container {
   --bg: #0b1020;
   --panel: #0f172a;
   --border: #1f2937;
@@ -9,15 +10,17 @@
   --code-bg: #0a0f1a;
   --table-stripe: #0c1426;
 }
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
+
+.factor-generator-container * { box-sizing: border-box; }
+.factor-generator-container {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, 'Noto Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   background: var(--bg);
   color: var(--text);
+  min-height: 100vh;
 }
-.app-header {
+
+.factor-generator-container .app-header {
   height: 64px;
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -25,33 +28,40 @@ body {
   padding: 0 24px;
   background: #0c1430;
 }
-.brand-title {
+
+.factor-generator-container .brand-title {
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.3px;
 }
-.brand-subtitle {
+
+.factor-generator-container .brand-subtitle {
   font-size: 12px;
   color: var(--muted);
 }
-.container {
+
+.factor-generator-container .container {
   max-width: 1080px;
   margin: 28px auto;
   padding: 0 20px;
 }
-.layout {
+
+.factor-generator-container .layout {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 20px;
 }
-.sidebar { height: 100%; }
-.content { width: 100%; }
-.history-list {
+
+.factor-generator-container .sidebar { height: 100%; }
+.factor-generator-container .content { width: 100%; }
+
+.factor-generator-container .history-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.history-item {
+
+.factor-generator-container .history-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,32 +69,52 @@ body {
   border-bottom: 1px solid var(--border);
   cursor: pointer;
 }
-.history-item:hover { background: var(--table-stripe); }
-.history-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-.history-time { font-size: 12px; color: var(--muted); }
-.block-actions {
+
+.factor-generator-container .history-item:hover { background: var(--table-stripe); }
+.factor-generator-container .history-title { 
+  font-size: 13px; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  max-width: 180px; 
+}
+
+.factor-generator-container .history-time { 
+  font-size: 12px; 
+  color: var(--muted); 
+}
+
+.factor-generator-container .block-actions {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
   justify-content: flex-end;
 }
-.btn.small { padding: 6px 10px; font-size: 12px; }
-.panel {
+
+.factor-generator-container .btn.small { 
+  padding: 6px 10px; 
+  font-size: 12px; 
+}
+
+.factor-generator-container .panel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 10px;
   margin-bottom: 20px;
 }
-.panel-title {
+
+.factor-generator-container .panel-title {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
   color: var(--muted);
 }
-.panel-body {
+
+.factor-generator-container .panel-body {
   padding: 16px;
 }
-.input-area {
+
+.factor-generator-container .input-area {
   width: 100%;
   min-height: 120px;
   resize: vertical;
@@ -96,15 +126,23 @@ body {
   font-size: 14px;
   line-height: 1.6;
 }
-.toolbar {
+
+.factor-generator-container .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
 }
-.suggestions { margin-top: 10px; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-.chip {
+
+.factor-generator-container .suggestions { margin-top: 10px; }
+.factor-generator-container .chips { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+  margin-top: 6px; 
+}
+
+.factor-generator-container .chip {
   display: inline-block;
   padding: 6px 10px;
   border: 1px solid var(--border);
@@ -113,9 +151,15 @@ body {
   cursor: pointer;
   background: var(--panel);
 }
-.chip:hover { background: var(--table-stripe); }
-.label { color: var(--muted); font-size: 12px; margin-right: 8px; }
-.select {
+
+.factor-generator-container .chip:hover { background: var(--table-stripe); }
+.factor-generator-container .label { 
+  color: var(--muted); 
+  font-size: 12px; 
+  margin-right: 8px; 
+}
+
+.factor-generator-container .select {
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--border);
@@ -123,7 +167,8 @@ body {
   padding: 8px 10px;
   min-width: 120px;
 }
-.btn {
+
+.factor-generator-container .btn {
   background: transparent;
   color: var(--text);
   border: 1px solid var(--border);
@@ -131,30 +176,43 @@ body {
   padding: 10px 16px;
   cursor: pointer;
 }
-.btn.primary {
+
+.factor-generator-container .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
 }
-.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.results { display: block; }
-.result-block {
+
+.factor-generator-container .btn.primary:hover { 
+  background: var(--accent-hover); 
+  border-color: var(--accent-hover); 
+}
+
+.factor-generator-container .btn:disabled { 
+  opacity: 0.6; 
+  cursor: not-allowed; 
+}
+
+.factor-generator-container .results { display: block; }
+.factor-generator-container .result-block {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px;
   margin-top: 16px;
   background: var(--panel);
 }
-.result-block h2 {
+
+.factor-generator-container .result-block h2 {
   margin: 0 0 12px 0;
   font-size: 16px;
 }
-.subsection-title {
+
+.factor-generator-container .subsection-title {
   margin: 14px 0 8px 0;
   font-size: 13px;
   color: var(--muted);
 }
-pre {
+
+.factor-generator-container pre {
   background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -162,20 +220,44 @@ pre {
   font-size: 12px;
   overflow-x: auto;
 }
-table {
+
+.factor-generator-container table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
   margin-top: 8px;
 }
-thead th {
+
+.factor-generator-container thead th {
   text-align: left;
   border-bottom: 1px solid var(--border);
   padding: 8px 6px;
   color: var(--muted);
 }
-tbody td {
+
+.factor-generator-container tbody td {
   border-bottom: 1px solid var(--border);
   padding: 8px 6px;
 }
-tbody tr:nth-child(odd) { background: var(--table-stripe); }
+
+.factor-generator-container tbody tr:nth-child(odd) { 
+  background: var(--table-stripe); 
+}
+
+/* 文档说明部分样式 */
+.factor-generator-container + * {
+  margin-top: 40px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #333;
+}
+
+.factor-generator-container + * h2 {
+  color: #2563eb;
+  margin-top: 30px;
+}
+
+.factor-generator-container + * ul {
+  padding-left: 20px;
+}
