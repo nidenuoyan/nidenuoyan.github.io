@@ -3,7 +3,9 @@
  */
 
 // API 基础地址
-const API_BASE_URL = 'http://localhost:8000';
+// 演示版：使用模拟数据，无需后端服务
+const API_BASE_URL = '';
+const DEMO_MODE = true;
 
 // 会话历史
 let sessionHistory = JSON.parse(localStorage.getItem('cost_history') || '[]');
