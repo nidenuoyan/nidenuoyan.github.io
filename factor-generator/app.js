@@ -3,9 +3,9 @@
  */
 
 // API 基础地址
-// 演示版：使用模拟数据，无需后端服务
-const API_BASE_URL = '';
-const DEMO_MODE = true;
+// 生产环境：连接到后端 API 服务
+const API_BASE_URL = 'https://factor.zoengsang.cloud';
+const DEMO_MODE = false;
 
 // 会话历史
 let sessionHistory = JSON.parse(localStorage.getItem('cost_history') || '[]');
