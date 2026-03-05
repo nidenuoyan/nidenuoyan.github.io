@@ -119,21 +119,34 @@ const costBaseline = {
 };
 
 // 初始化
-document.addEventListener('DOMContentLoaded', () => {
-  initTabs();
-  initButtons();
-  initSearch();
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('[初始化] 开始...');
   
-  // 从 API 获取最新价格，然后加载
-  refreshPrices().then(() => {
+  try {
+    initTabs();
+    initButtons();
+    initSearch();
+    
+    // 先加载本地数据确保页面显示
     loadMaterialPrices();
-  }).catch(() => {
-    // 如果 API 失败，使用本地数据
-    loadMaterialPrices();
-  });
-  
-  renderHistory();
-  initCharts();
+    
+    // 然后从 API 获取最新价格更新
+    if (!USE_LOCAL_DATA) {
+      console.log('[初始化] 从 API 获取最新价格...');
+      try {
+        await refreshPrices();
+      } catch (error) {
+        console.error('[初始化] API 获取失败，使用本地数据:', error);
+      }
+    }
+    
+    renderHistory();
+    initCharts();
+    
+    console.log('[初始化] 完成');
+  } catch (error) {
+    console.error('[初始化] 错误:', error);
+  }
 });
 
 // 初始化选项卡
@@ -310,13 +323,19 @@ async function refreshPrices() {
 // 从后端 API 获取最新价格
 async function fetchPricesFromAPI() {
   try {
+    // 创建 AbortController 用于超时（兼容性更好）
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     const response = await fetch(`${API_BASE_URL}/api/prices`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
       },
-      signal: AbortSignal.timeout(10000)
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       throw new Error(`API 返回错误: ${response.status}`);
@@ -325,15 +344,20 @@ async function fetchPricesFromAPI() {
     const result = await response.json();
     
     if (result.success && result.data) {
+      console.log('[API] 获取到价格数据:', result.data);
+      
       // 转换 API 数据格式到本地格式 - 根据 name 字段匹配
       Object.keys(result.data).forEach(key => {
         const item = result.data[key];
+        if (!item || !item.name) return;
+        
         // 根据 name 查找前端对应的数据项
         const localKey = Object.keys(materialPricesDB).find(k => 
-          materialPricesDB[k].name === item.name || k === item.name
+          materialPricesDB[k] && (materialPricesDB[k].name === item.name || k === item.name)
         );
         
         if (localKey) {
+          console.log(`[API] 更新价格: ${item.name} = ${item.price}`);
           materialPricesDB[localKey] = {
             ...materialPricesDB[localKey],
             price: item.price,
@@ -342,6 +366,8 @@ async function fetchPricesFromAPI() {
             source: item.source || 'API',
             updateTime: item.update_time || new Date().toISOString()
           };
+        } else {
+          console.log(`[API] 未找到匹配项: ${item.name}`);
         }
       });
       
@@ -350,7 +376,7 @@ async function fetchPricesFromAPI() {
     
     throw new Error('API 数据格式错误');
   } catch (error) {
-    console.error('从 API 获取价格失败:', error);
+    console.error('[API] 获取价格失败:', error);
     throw error;
   }
 }
