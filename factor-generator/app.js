@@ -10,8 +10,8 @@ const API_BASE_URL = 'https://factor.zoengsang.cloud';
 let priceData = {};
 let lastUpdate = null;
 
-// 分类排序（匹配后端）
-const CATEGORY_ORDER = ['硅片', '电池片', '硅料', '银浆', '玻璃', '胶膜', '背板', '边框', '焊带', '电气', '靶材', '网版', '石英', '化学品', '铝浆', '金属', '其他'];
+// 分类排序（匹配后端实际返回的数据）
+const CATEGORY_ORDER = ['硅片', '电池片', '银浆', '玻璃', '胶膜', '硅料', '其他'];
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
