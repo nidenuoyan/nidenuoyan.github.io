@@ -8,6 +8,9 @@
 const API_BASE_URL = 'https://factor.zoengsang.cloud';
 const DEMO_MODE = false;
 
+// 备用：如果后端不可用，使用本地数据
+const USE_LOCAL_DATA = false;
+
 // 会话历史
 let sessionHistory = JSON.parse(localStorage.getItem('cost_history') || '[]');
 
@@ -258,105 +261,71 @@ function filterMaterialPrices(searchTerm) {
 
 // 刷新价格
 async function refreshPrices() {
-  showLoading('正在从在线数据源获取最新价格...');
+  showLoading('正在从服务器获取最新价格...');
   
   try {
-    if (!DEMO_MODE) {
-      const response = await fetch(`${API_BASE_URL}/api/materials/prices`);
-      const data = await response.json();
-      if (data.materials) {
-        Object.assign(materialPricesDB, data.materials);
-      }
+    if (USE_LOCAL_DATA) {
+      // 使用本地数据（调试模式）
+      await new Promise(resolve => setTimeout(resolve, 800));
+      showToast('本地模式：使用静态数据', 'info');
     } else {
-      // 演示模式：模拟从在线数据源获取最新价格
-      await simulateOnlinePriceFetch();
+      // 从后端 API 获取
+      await fetchPricesFromAPI();
+      showToast('价格数据已从服务器更新', 'success');
     }
     
     loadMaterialPrices();
-    showToast('价格数据已从在线数据源更新', 'success');
   } catch (error) {
-    console.error('获取在线价格失败:', error);
-    showToast('获取在线数据失败，使用本地缓存数据', 'warning');
+    console.error('获取价格失败:', error);
+    showToast('获取服务器数据失败，使用本地缓存', 'warning');
     loadMaterialPrices();
   } finally {
     hideLoading();
   }
 }
 
-// 模拟从在线数据源获取价格
-async function simulateOnlinePriceFetch() {
-  // 模拟网络延迟
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // 模拟从PVinfolink和上海有色金属网获取的最新价格（2024年底-2025年初行情）
-  // 添加随机波动使数据更真实
-  const onlineUpdates = {
-    'M10硅片(182mm)': { 
-      price: 1.12, 
-      trend: 'down', 
-      change: -2.5,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    'G12硅片(210mm)': { 
-      price: 1.68, 
-      trend: 'down', 
-      change: -2.0,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    'N型M10硅片': { 
-      price: 1.22, 
-      trend: 'down', 
-      change: -1.8,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    '正银浆': { 
-      price: 7920, 
-      trend: 'up', 
-      change: 3.5,
-      source: '上海有色金属网',
-      updateTime: new Date().toISOString()
-    },
-    '硅料(致密料)': { 
-      price: 37.5, 
-      trend: 'down', 
-      change: -1.2,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    '电池片(PERC-182)': { 
-      price: 0.275, 
-      trend: 'down', 
-      change: -1.5,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    '电池片(TOPCon-182)': { 
-      price: 0.295, 
-      trend: 'down', 
-      change: -1.2,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    '光伏玻璃(3.2mm)': { 
-      price: 21.5, 
-      trend: 'down', 
-      change: -0.8,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
+// 从后端 API 获取最新价格
+async function fetchPricesFromAPI() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/prices`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      // 添加超时
+      signal: AbortSignal.timeout(10000)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API 返回错误: ${response.status}`);
     }
-  };
-  
-  // 更新本地数据库
-  Object.keys(onlineUpdates).forEach(key => {
-    if (materialPricesDB[key]) {
-      materialPricesDB[key] = { ...materialPricesDB[key], ...onlineUpdates[key] };
+    
+    const result = await response.json();
+    
+    if (result.success && result.data) {
+      // 转换 API 数据格式到本地格式
+      Object.keys(result.data).forEach(key => {
+        const item = result.data[key];
+        if (materialPricesDB[key]) {
+          materialPricesDB[key] = {
+            ...materialPricesDB[key],
+            price: item.price,
+            trend: item.trend || 'stable',
+            change: item.change || 0,
+            source: item.source || 'API',
+            updateTime: item.update_time || new Date().toISOString()
+          };
+        }
+      });
+      
+      return result.data;
     }
-  });
-  
-  return onlineUpdates;
+    
+    throw new Error('API 数据格式错误');
+  } catch (error) {
+    console.error('从 API 获取价格失败:', error);
+    throw error;
+  }
 }
 
 // 加载模板
