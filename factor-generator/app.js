@@ -242,29 +242,55 @@ function showToast(message, type = 'info') {
 
 // 加载原材料价格
 function loadMaterialPrices() {
-  const container = document.getElementById('materialPrices');
-  if (!container) return;
+  console.log('[加载] 开始加载价格...');
   
-  renderMaterialList(Object.entries(materialPricesDB));
+  const container = document.getElementById('materialPrices');
+  if (!container) {
+    console.error('[加载] 找不到 materialPrices 容器');
+    return;
+  }
+  
+  const entries = Object.entries(materialPricesDB);
+  console.log('[加载] 材料条目数:', entries.length);
+  
+  renderMaterialList(entries);
   
   // 更新更新时间
   const updateTime = document.getElementById('updateTime');
   if (updateTime) {
     updateTime.textContent = new Date().toLocaleDateString('zh-CN');
   }
+  
+  console.log('[加载] 完成');
 }
 
 // 渲染材料列表
 function renderMaterialList(materials) {
   const container = document.getElementById('materialPrices');
-  if (!container) return;
+  if (!container) {
+    console.error('[渲染] 找不到 materialPrices 容器');
+    return;
+  }
+  
+  console.log('[渲染] 材料数量:', materials.length);
+  
+  if (materials.length === 0) {
+    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">暂无价格数据</div>';
+    return;
+  }
   
   container.innerHTML = materials.map(([key, data]) => {
+    // 安全检查
+    if (!data || typeof data !== 'object') {
+      console.warn('[渲染] 无效数据:', key, data);
+      return '';
+    }
+    
     // 优先使用 data.name，如果不存在则使用 key
     const displayName = data.name || key;
     const trendIcon = data.trend === 'up' ? '📈' : data.trend === 'down' ? '📉' : '➡️';
     const trendClass = data.trend === 'up' ? 'up' : data.trend === 'down' ? 'down' : '';
-    const changeText = data.change > 0 ? `+${data.change}%` : `${data.change}%`;
+    const changeText = data.change > 0 ? `+${data.change}%` : `${data.change || 0}%`;
     const sourceIcon = data.source === 'PVinfolink' ? '🔷' : data.source === '上海有色金属网' ? '🔶' : '📊';
     
     return `
@@ -278,13 +304,15 @@ function renderMaterialList(materials) {
         <div style="text-align: right;">
           <div>
             <span class="price-value">${data.price}</span>
-            <span class="price-unit">${data.unit}</span>
+            <span class="price-unit">${data.unit || ''}</span>
           </div>
           <span class="price-trend ${trendClass}">${trendIcon} ${changeText}</span>
         </div>
       </div>
     `;
   }).join('');
+  
+  console.log('[渲染] 完成');
 }
 
 // 过滤材料价格
