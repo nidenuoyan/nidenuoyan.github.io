@@ -1,13 +1,13 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>zoengkei_blog | zoengkei_blog</title><meta name="author" content="zoengkei"><meta name="copyright" content="zoengkei"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="光伏成本智能分析助手演示版说明这是光伏成本分析助手的前端演示版本。 功能特点 BOM成本核算：支持 PERC&#x2F;TOPCon&#x2F;HJT 电池片和 182&#x2F;210 组件 价格敏感性分析：分析原材料价格变化对成本的影响 LLM智能解析：支持自然语言输入成本分析需求 可视化报表：成本构成分析和 Python 代码生成  技术栈 前端：HTML + CSS + JavaScrip">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>zoengkei_blog | zoengkei_blog</title><meta name="author" content="zoengkei"><meta name="copyright" content="zoengkei"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="光伏成本智能分析助手演示版说明这是光伏成本分析助手的前端演示版本。 功能特点 BOM成本核算：支持 PERC&#x2F;TOPCon&#x2F;HJT&#x2F;BC 电池片和 182&#x2F;210 组件 价格敏感性分析：分析原材料价格变化对成本的影响 多场景成本对比：对比不同技术路线的成本差异 在线价格数据：支持从 PVinfolink、上海有色金属网获取最新价格 LLM智能解析：支持自然语">
 <meta property="og:type" content="website">
 <meta property="og:title" content="zoengkei_blog">
 <meta property="og:url" content="https://zoengsang.cloud/factor-generator/README.html">
 <meta property="og:site_name" content="zoengkei_blog">
-<meta property="og:description" content="光伏成本智能分析助手演示版说明这是光伏成本分析助手的前端演示版本。 功能特点 BOM成本核算：支持 PERC&#x2F;TOPCon&#x2F;HJT 电池片和 182&#x2F;210 组件 价格敏感性分析：分析原材料价格变化对成本的影响 LLM智能解析：支持自然语言输入成本分析需求 可视化报表：成本构成分析和 Python 代码生成  技术栈 前端：HTML + CSS + JavaScrip">
+<meta property="og:description" content="光伏成本智能分析助手演示版说明这是光伏成本分析助手的前端演示版本。 功能特点 BOM成本核算：支持 PERC&#x2F;TOPCon&#x2F;HJT&#x2F;BC 电池片和 182&#x2F;210 组件 价格敏感性分析：分析原材料价格变化对成本的影响 多场景成本对比：对比不同技术路线的成本差异 在线价格数据：支持从 PVinfolink、上海有色金属网获取最新价格 LLM智能解析：支持自然语">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zoengsang.cloud/img/xiaoxin.png">
-<meta property="article:published_time" content="2026-03-04T08:35:52.910Z">
-<meta property="article:modified_time" content="2026-03-04T08:35:52.910Z">
+<meta property="article:published_time" content="2026-03-05T05:24:25.613Z">
+<meta property="article:modified_time" content="2026-03-05T05:24:25.613Z">
 <meta property="article:author" content="zoengkei">
 <meta property="article:tag" content="数据分析, 量化研究, Python, SQL, 机器学习, 数据可视化, 技术博客">
 <meta name="twitter:card" content="summary">
@@ -146,16 +146,52 @@
   pageType: 'page'
 }</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/xiaoxin.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/ loading='lazy'></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/portfolio/"><i class="fa-fw fas fa-briefcase"></i><span> 项目作品</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/"><i class="fa-fw fas fa-chart-line"></i><span> 数据分析</span></a></div><div class="menus_item"><a class="site-page" href="/factor-generator/"><i class="fa-fw fas fa-solar-panel"></i><span> 光伏成本</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-circle"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="not-home-page fixed" id="page-header" style="background-image: url(/img/luoqixi.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">zoengkei_blog</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/portfolio/"><i class="fa-fw fas fa-briefcase"></i><span> 项目作品</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/"><i class="fa-fw fas fa-chart-line"></i><span> 数据分析</span></a></div><div class="menus_item"><a class="site-page" href="/factor-generator/"><i class="fa-fw fas fa-solar-panel"></i><span> 光伏成本</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-circle"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="page-site-info"><h1 id="site-title"></h1></div></header><main class="layout" id="content-inner"><div id="page"><div class="container" id="article-container"><h1 id="光伏成本智能分析助手"><a href="#光伏成本智能分析助手" class="headerlink" title="光伏成本智能分析助手"></a>光伏成本智能分析助手</h1><h2 id="演示版说明"><a href="#演示版说明" class="headerlink" title="演示版说明"></a>演示版说明</h2><p>这是光伏成本分析助手的前端演示版本。</p>
 <h2 id="功能特点"><a href="#功能特点" class="headerlink" title="功能特点"></a>功能特点</h2><ul>
-<li><strong>BOM成本核算</strong>：支持 PERC&#x2F;TOPCon&#x2F;HJT 电池片和 182&#x2F;210 组件</li>
+<li><strong>BOM成本核算</strong>：支持 PERC&#x2F;TOPCon&#x2F;HJT&#x2F;BC 电池片和 182&#x2F;210 组件</li>
 <li><strong>价格敏感性分析</strong>：分析原材料价格变化对成本的影响</li>
+<li><strong>多场景成本对比</strong>：对比不同技术路线的成本差异</li>
+<li><strong>在线价格数据</strong>：支持从 PVinfolink、上海有色金属网获取最新价格</li>
 <li><strong>LLM智能解析</strong>：支持自然语言输入成本分析需求</li>
 <li><strong>可视化报表</strong>：成本构成分析和 Python 代码生成</li>
+</ul>
+<h2 id="技术路线支持"><a href="#技术路线支持" class="headerlink" title="技术路线支持"></a>技术路线支持</h2><table>
+<thead>
+<tr>
+<th>技术</th>
+<th>规格</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PERC</td>
+<td>182&#x2F;210mm</td>
+<td>成熟技术，性价比高</td>
+</tr>
+<tr>
+<td>TOPCon</td>
+<td>182&#x2F;210mm</td>
+<td>高效率，逐渐成为主流</td>
+</tr>
+<tr>
+<td>HJT</td>
+<td>210mm</td>
+<td>高效率，低温工艺</td>
+</tr>
+<tr>
+<td>BC</td>
+<td>182&#x2F;210mm</td>
+<td>背接触技术，美观高效</td>
+</tr>
+</tbody></table>
+<h2 id="数据来源"><a href="#数据来源" class="headerlink" title="数据来源"></a>数据来源</h2><ul>
+<li><strong>PVinfolink</strong>：光伏产业链价格数据（硅片、电池片、组件等）</li>
+<li><strong>上海有色金属网</strong>：有色金属及光伏材料价格（银浆、铝材、化学品等）</li>
 </ul>
 <h2 id="技术栈"><a href="#技术栈" class="headerlink" title="技术栈"></a>技术栈</h2><ul>
 <li>前端：HTML + CSS + JavaScript</li>
 <li>后端：FastAPI + Python</li>
 <li>LLM：DeepSeek Chat API</li>
 <li>数据分析：Pandas + NumPy</li>
+<li>图表：Chart.js</li>
 </ul>
 <h2 id="开发者"><a href="#开发者" class="headerlink" title="开发者"></a>开发者</h2><p>zoengkei - 光伏行业成本会计转型数据分析</p>
 <ul>
@@ -169,7 +205,7 @@
           </div>
           <ul class="card-category-list" id="aside-cat-list">
             <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Python/"><span class="card-category-list-name">Python</span><span class="card-category-list-count">2</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%9B%BE%E7%89%87/"><span class="card-category-list-name">图片</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/"><span class="card-category-list-name">数据分析</span><span class="card-category-list-count">3</span></a></li>
-          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" style="font-size: 1.5em; color: #99a9bf">数据分析</a> <a href="/tags/%E4%BB%85%E7%94%A8%E4%BA%8E%E5%AD%A6%E4%B9%A0/" style="font-size: 1.3em; color: #99a1ac">仅用于学习</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 1.3em; color: #99a1ac">机器学习</a> <a href="/tags/DeepSeek/" style="font-size: 1.1em; color: #999">DeepSeek</a> <a href="/tags/AI/" style="font-size: 1.1em; color: #999">AI</a> <a href="/tags/Pandas/" style="font-size: 1.1em; color: #999">Pandas</a> <a href="/tags/Python-%E5%AD%A6%E4%B9%A0/" style="font-size: 1.3em; color: #99a1ac">Python 学习</a> <a href="/tags/%E6%B1%82%E8%81%8C/" style="font-size: 1.1em; color: #999">求职</a> <a href="/tags/SQL/" style="font-size: 1.1em; color: #999">SQL</a> <a href="/tags/MySQL/" style="font-size: 1.1em; color: #999">MySQL</a> <a href="/tags/Python/" style="font-size: 1.3em; color: #99a1ac">Python</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/" style="font-size: 1.1em; color: #999">数据可视化</a> <a href="/tags/Flask/" style="font-size: 1.1em; color: #999">Flask</a> <a href="/tags/%E4%BD%9C%E5%93%81%E9%9B%86/" style="font-size: 1.1em; color: #999">作品集</a> <a href="/tags/%E7%94%B5%E5%95%86%E5%88%86%E6%9E%90/" style="font-size: 1.1em; color: #999">电商分析</a></div></div><div class="card-widget card-archives">
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 1.3em; color: #99a1ac">机器学习</a> <a href="/tags/MySQL/" style="font-size: 1.1em; color: #999">MySQL</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/" style="font-size: 1.1em; color: #999">数据可视化</a> <a href="/tags/%E6%B1%82%E8%81%8C/" style="font-size: 1.1em; color: #999">求职</a> <a href="/tags/SQL/" style="font-size: 1.1em; color: #999">SQL</a> <a href="/tags/Python-%E5%AD%A6%E4%B9%A0/" style="font-size: 1.3em; color: #99a1ac">Python 学习</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" style="font-size: 1.5em; color: #99a9bf">数据分析</a> <a href="/tags/%E4%BD%9C%E5%93%81%E9%9B%86/" style="font-size: 1.1em; color: #999">作品集</a> <a href="/tags/%E4%BB%85%E7%94%A8%E4%BA%8E%E5%AD%A6%E4%B9%A0/" style="font-size: 1.3em; color: #99a1ac">仅用于学习</a> <a href="/tags/%E7%94%B5%E5%95%86%E5%88%86%E6%9E%90/" style="font-size: 1.1em; color: #999">电商分析</a> <a href="/tags/Python/" style="font-size: 1.3em; color: #99a1ac">Python</a> <a href="/tags/Flask/" style="font-size: 1.1em; color: #999">Flask</a> <a href="/tags/AI/" style="font-size: 1.1em; color: #999">AI</a> <a href="/tags/DeepSeek/" style="font-size: 1.1em; color: #999">DeepSeek</a> <a href="/tags/Pandas/" style="font-size: 1.1em; color: #999">Pandas</a></div></div><div class="card-widget card-archives">
     <div class="item-headline">
       <i class="fas fa-archive"></i>
       <span>归档</span>
@@ -206,7 +242,7 @@
         </li>
       
     </ul>
-  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">7</div></div><div class="webinfo-item"><div class="item-name">本站总字数 :</div><div class="item-count">9.9k</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-03-05T05:08:28.099Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By zoengkei</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.2</a><br>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">7</div></div><div class="webinfo-item"><div class="item-name">本站总字数 :</div><div class="item-count">9.9k</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-03-05T05:25:27.264Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By zoengkei</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.2</a><br>
 <img src="https://img2023.cnblogs.com/blog/2233039/202405/2233039-20240526105735195-780051803.png" style="vertical-align: middle;" height="20px" loading='lazy'>
 <a href="http://beian.miit.gov.cn/"  style="color:#f72b07" target="_blank">粤ICP备2025489933号-1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.2"></script><script src="/js/main.js?v=5.5.2"></script><div class="js-pjax"><script>(() => {
   const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'

@@ -116,7 +116,10 @@ layout: false
           <div class="price-list" id="materialPrices"></div>
           <div class="price-update">
             <small>数据更新: <span id="updateTime">2026-03-01</span></small>
-            <button class="btn-refresh" onclick="refreshPrices()" title="刷新价格">🔄</button>
+            <button class="btn-refresh" onclick="refreshPrices()" title="从PVinfolink/上海有色金属网刷新">🔄</button>
+          </div>
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">
+            <div>🔷 PVinfolink | 🔶 上海有色金属网</div>
           </div>
         </div>
 
@@ -134,6 +137,10 @@ layout: false
             <button class="template-btn" onclick="loadTemplate('hjt_cost')">
               <span class="template-icon">🚀</span>
               <span class="template-text">HJT电池片成本核算</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('bc_cost')">
+              <span class="template-icon">⚫</span>
+              <span class="template-text">BC电池片成本核算</span>
             </button>
             <button class="template-btn" onclick="loadTemplate('module_182')">
               <span class="template-icon">📦</span>
@@ -161,7 +168,7 @@ layout: false
         <div class="panel">
           <h3 class="panel-title">💡 使用提示</h3>
           <div class="tips-list">
-            <div class="tip-item">• 支持自然语言输入，如"计算182 PERC电池片成本"</div>
+            <div class="tip-item">• 支持自然语言输入，如"计算182 BC电池片成本"</div>
             <div class="tip-item">• 可在差异分析中对比标准与实际成本</div>
             <div class="tip-item">• 敏感性分析支持多因素同时分析</div>
             <div class="tip-item">• 历史记录自动保存在本地</div>
