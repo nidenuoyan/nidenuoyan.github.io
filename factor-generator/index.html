@@ -1,3 +1,9 @@
+---
+title: 光伏成本智能分析助手
+date: 2026-03-05 10:00:00
+layout: false
+---
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -99,333 +105,332 @@
       </nav>
     </header>
 
-<pre><code>&lt;main class=&quot;main-content&quot;&gt;
-  &lt;!-- 左侧工具栏 --&gt;
-  &lt;aside class=&quot;sidebar&quot;&gt;
-    &lt;div class=&quot;panel&quot;&gt;
-      &lt;h3 class=&quot;panel-title&quot;&gt;📊 原材料参考价格&lt;/h3&gt;
-      &lt;div class=&quot;price-search&quot;&gt;
-        &lt;input type=&quot;text&quot; id=&quot;priceSearch&quot; placeholder=&quot;搜索材料...&quot; class=&quot;search-input&quot;&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;price-list&quot; id=&quot;materialPrices&quot;&gt;&lt;/div&gt;
-      &lt;div class=&quot;price-update&quot;&gt;
-        &lt;small&gt;数据更新: &lt;span id=&quot;updateTime&quot;&gt;2026-03-01&lt;/span&gt;&lt;/small&gt;
-        &lt;button class=&quot;btn-refresh&quot; onclick=&quot;refreshPrices()&quot; title=&quot;刷新价格&quot;&gt;🔄&lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
+    <main class="main-content">
+      <!-- 左侧工具栏 -->
+      <aside class="sidebar">
+        <div class="panel">
+          <h3 class="panel-title">📊 原材料参考价格</h3>
+          <div class="price-search">
+            <input type="text" id="priceSearch" placeholder="搜索材料..." class="search-input">
+          </div>
+          <div class="price-list" id="materialPrices"></div>
+          <div class="price-update">
+            <small>数据更新: <span id="updateTime">2026-03-01</span></small>
+            <button class="btn-refresh" onclick="refreshPrices()" title="刷新价格">🔄</button>
+          </div>
+        </div>
 
-    &lt;div class=&quot;panel&quot;&gt;
-      &lt;h3 class=&quot;panel-title&quot;&gt;📋 常用分析模板&lt;/h3&gt;
-      &lt;div class=&quot;template-list&quot;&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;perc_cost&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;🔋&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;PERC电池片成本核算&lt;/span&gt;
-        &lt;/button&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;topcon_cost&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;⚡&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;TOPCon电池片成本核算&lt;/span&gt;
-        &lt;/button&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;hjt_cost&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;🚀&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;HJT电池片成本核算&lt;/span&gt;
-        &lt;/button&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;module_182&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;📦&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;182组件成本分析&lt;/span&gt;
-        &lt;/button&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;module_210&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;📦&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;210组件成本分析&lt;/span&gt;
-        &lt;/button&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;variance_analysis&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;📈&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;成本差异分析&lt;/span&gt;
-        &lt;/button&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;wafer_impact&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;💎&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;硅片涨价影响分析&lt;/span&gt;
-        &lt;/button&gt;
-        &lt;button class=&quot;template-btn&quot; onclick=&quot;loadTemplate(&#39;silver_impact&#39;)&quot;&gt;
-          &lt;span class=&quot;template-icon&quot;&gt;🥈&lt;/span&gt;
-          &lt;span class=&quot;template-text&quot;&gt;银浆价格敏感性&lt;/span&gt;
-        &lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
+        <div class="panel">
+          <h3 class="panel-title">📋 常用分析模板</h3>
+          <div class="template-list">
+            <button class="template-btn" onclick="loadTemplate('perc_cost')">
+              <span class="template-icon">🔋</span>
+              <span class="template-text">PERC电池片成本核算</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('topcon_cost')">
+              <span class="template-icon">⚡</span>
+              <span class="template-text">TOPCon电池片成本核算</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('hjt_cost')">
+              <span class="template-icon">🚀</span>
+              <span class="template-text">HJT电池片成本核算</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('module_182')">
+              <span class="template-icon">📦</span>
+              <span class="template-text">182组件成本分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('module_210')">
+              <span class="template-icon">📦</span>
+              <span class="template-text">210组件成本分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('variance_analysis')">
+              <span class="template-icon">📈</span>
+              <span class="template-text">成本差异分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('wafer_impact')">
+              <span class="template-icon">💎</span>
+              <span class="template-text">硅片涨价影响分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('silver_impact')">
+              <span class="template-icon">🥈</span>
+              <span class="template-text">银浆价格敏感性</span>
+            </button>
+          </div>
+        </div>
 
-    &lt;div class=&quot;panel&quot;&gt;
-      &lt;h3 class=&quot;panel-title&quot;&gt;💡 使用提示&lt;/h3&gt;
-      &lt;div class=&quot;tips-list&quot;&gt;
-        &lt;div class=&quot;tip-item&quot;&gt;• 支持自然语言输入，如&quot;计算182 PERC电池片成本&quot;&lt;/div&gt;
-        &lt;div class=&quot;tip-item&quot;&gt;• 可在差异分析中对比标准与实际成本&lt;/div&gt;
-        &lt;div class=&quot;tip-item&quot;&gt;• 敏感性分析支持多因素同时分析&lt;/div&gt;
-        &lt;div class=&quot;tip-item&quot;&gt;• 历史记录自动保存在本地&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/aside&gt;
+        <div class="panel">
+          <h3 class="panel-title">💡 使用提示</h3>
+          <div class="tips-list">
+            <div class="tip-item">• 支持自然语言输入，如"计算182 PERC电池片成本"</div>
+            <div class="tip-item">• 可在差异分析中对比标准与实际成本</div>
+            <div class="tip-item">• 敏感性分析支持多因素同时分析</div>
+            <div class="tip-item">• 历史记录自动保存在本地</div>
+          </div>
+        </div>
+      </aside>
 
-  &lt;!-- 主内容区 --&gt;
-  &lt;section class=&quot;content-area&quot;&gt;
-    &lt;!-- BOM成本核算面板 --&gt;
-    &lt;div class=&quot;tab-panel active&quot; id=&quot;cost-calc-panel&quot;&gt;
-      &lt;div class=&quot;input-section&quot;&gt;
-        &lt;h2 class=&quot;section-title&quot;&gt;输入成本分析需求&lt;/h2&gt;
-        &lt;textarea 
-          id=&quot;costInput&quot; 
-          class=&quot;input-textarea&quot; 
-          placeholder=&quot;请输入您的成本分析需求，例如：&amp;#10;计算PERC电池片单位成本，硅片3.5元/片，正银浆120mg/片，良率98%&amp;#10;&amp;#10;或者选择左侧的快捷模板开始&quot;
-        &gt;&lt;/textarea&gt;
-        
-        &lt;div class=&quot;input-options&quot;&gt;
-          &lt;div class=&quot;option-group&quot;&gt;
-            &lt;label&gt;产品类型:&lt;/label&gt;
-            &lt;select id=&quot;productType&quot;&gt;
-              &lt;option value=&quot;cell&quot;&gt;电池片&lt;/option&gt;
-              &lt;option value=&quot;module&quot;&gt;组件&lt;/option&gt;
-            &lt;/select&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;option-group&quot;&gt;
-            &lt;label&gt;技术路线:&lt;/label&gt;
-            &lt;select id=&quot;cellType&quot;&gt;
-              &lt;option value=&quot;PERC&quot;&gt;PERC&lt;/option&gt;
-              &lt;option value=&quot;TOPCon&quot;&gt;TOPCon&lt;/option&gt;
-              &lt;option value=&quot;HJT&quot;&gt;HJT&lt;/option&gt;
-            &lt;/select&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;option-group&quot;&gt;
-            &lt;label&gt;尺寸规格:&lt;/label&gt;
-            &lt;select id=&quot;sizeSpec&quot;&gt;
-              &lt;option value=&quot;182&quot;&gt;182mm&lt;/option&gt;
-              &lt;option value=&quot;210&quot;&gt;210mm&lt;/option&gt;
-              &lt;option value=&quot;166&quot;&gt;166mm&lt;/option&gt;
-            &lt;/select&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
+      <!-- 主内容区 -->
+      <section class="content-area">
+        <!-- BOM成本核算面板 -->
+        <div class="tab-panel active" id="cost-calc-panel">
+          <div class="input-section">
+            <h2 class="section-title">输入成本分析需求</h2>
+            <textarea 
+              id="costInput" 
+              class="input-textarea" 
+              placeholder="请输入您的成本分析需求，例如：&#10;计算PERC电池片单位成本，硅片3.5元/片，正银浆120mg/片，良率98%&#10;&#10;或者选择左侧的快捷模板开始"
+            ></textarea>
+            
+            <div class="input-options">
+              <div class="option-group">
+                <label>产品类型:</label>
+                <select id="productType">
+                  <option value="cell">电池片</option>
+                  <option value="module">组件</option>
+                </select>
+              </div>
+              <div class="option-group">
+                <label>技术路线:</label>
+                <select id="cellType">
+                  <option value="PERC">PERC</option>
+                  <option value="TOPCon">TOPCon</option>
+                  <option value="HJT">HJT</option>
+                </select>
+              </div>
+              <div class="option-group">
+                <label>尺寸规格:</label>
+                <select id="sizeSpec">
+                  <option value="182">182mm</option>
+                  <option value="210">210mm</option>
+                  <option value="166">166mm</option>
+                </select>
+              </div>
+            </div>
 
-        &lt;div class=&quot;action-buttons&quot;&gt;
-          &lt;button id=&quot;calcBtn&quot; class=&quot;btn btn-primary&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;🔍&lt;/span&gt; 开始分析
-          &lt;/button&gt;
-          &lt;button id=&quot;clearBtn&quot; class=&quot;btn btn-secondary&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;🗑️&lt;/span&gt; 清空
-          &lt;/button&gt;
-          &lt;button id=&quot;saveTemplateBtn&quot; class=&quot;btn btn-secondary&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;💾&lt;/span&gt; 保存模板
-          &lt;/button&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+            <div class="action-buttons">
+              <button id="calcBtn" class="btn btn-primary">
+                <span class="btn-icon">🔍</span> 开始分析
+              </button>
+              <button id="clearBtn" class="btn btn-secondary">
+                <span class="btn-icon">🗑️</span> 清空
+              </button>
+              <button id="saveTemplateBtn" class="btn btn-secondary">
+                <span class="btn-icon">💾</span> 保存模板
+              </button>
+            </div>
+          </div>
 
-      &lt;div class=&quot;result-section&quot; id=&quot;costResultSection&quot; style=&quot;display: none;&quot;&gt;
-        &lt;div class=&quot;result-header&quot;&gt;
-          &lt;h2 class=&quot;section-title&quot;&gt;分析结果&lt;/h2&gt;
-          &lt;div class=&quot;result-actions&quot;&gt;
-            &lt;button class=&quot;btn btn-sm btn-secondary&quot; onclick=&quot;exportResult(&#39;pdf&#39;)&quot;&gt;📄 PDF&lt;/button&gt;
-            &lt;button class=&quot;btn btn-sm btn-secondary&quot; onclick=&quot;exportResult(&#39;excel&#39;)&quot;&gt;📊 Excel&lt;/button&gt;
-            &lt;button class=&quot;btn btn-sm btn-secondary&quot; onclick=&quot;exportResult(&#39;image&#39;)&quot;&gt;🖼️ 图片&lt;/button&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div id=&quot;costResultContent&quot;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
+          <div class="result-section" id="costResultSection" style="display: none;">
+            <div class="result-header">
+              <h2 class="section-title">分析结果</h2>
+              <div class="result-actions">
+                <button class="btn btn-sm btn-secondary" onclick="exportResult('pdf')">📄 PDF</button>
+                <button class="btn btn-sm btn-secondary" onclick="exportResult('excel')">📊 Excel</button>
+                <button class="btn btn-sm btn-secondary" onclick="exportResult('image')">🖼️ 图片</button>
+              </div>
+            </div>
+            <div id="costResultContent"></div>
+          </div>
+        </div>
 
-    &lt;!-- 差异分析面板 --&gt;
-    &lt;div class=&quot;tab-panel&quot; id=&quot;variance-panel&quot;&gt;
-      &lt;div class=&quot;input-section&quot;&gt;
-        &lt;h2 class=&quot;section-title&quot;&gt;成本差异分析&lt;/h2&gt;
-        &lt;div class=&quot;variance-intro&quot;&gt;
-          对比标准成本与实际成本，分析差异原因和影响
-        &lt;/div&gt;
-        &lt;div class=&quot;variance-inputs&quot;&gt;
-          &lt;div class=&quot;input-row&quot;&gt;
-            &lt;label&gt;标准成本 (元/W):&lt;/label&gt;
-            &lt;input type=&quot;number&quot; id=&quot;stdCost&quot; placeholder=&quot;2.10&quot; step=&quot;0.01&quot;&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;input-row&quot;&gt;
-            &lt;label&gt;实际成本 (元/W):&lt;/label&gt;
-            &lt;input type=&quot;number&quot; id=&quot;actualCost&quot; placeholder=&quot;2.25&quot; step=&quot;0.01&quot;&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;input-row&quot;&gt;
-            &lt;label&gt;产量 (MW):&lt;/label&gt;
-            &lt;input type=&quot;number&quot; id=&quot;prodVolume&quot; placeholder=&quot;1000&quot;&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;input-row&quot;&gt;
-            &lt;label&gt;分析期间:&lt;/label&gt;
-            &lt;input type=&quot;month&quot; id=&quot;variancePeriod&quot; value=&quot;2026-03&quot;&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;action-buttons&quot;&gt;
-          &lt;button id=&quot;varianceBtn&quot; class=&quot;btn btn-primary&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;📊&lt;/span&gt; 分析差异
-          &lt;/button&gt;
-          &lt;button class=&quot;btn btn-secondary&quot; onclick=&quot;loadVarianceExample()&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;📋&lt;/span&gt; 加载示例
-          &lt;/button&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+        <!-- 差异分析面板 -->
+        <div class="tab-panel" id="variance-panel">
+          <div class="input-section">
+            <h2 class="section-title">成本差异分析</h2>
+            <div class="variance-intro">
+              对比标准成本与实际成本，分析差异原因和影响
+            </div>
+            <div class="variance-inputs">
+              <div class="input-row">
+                <label>标准成本 (元/W):</label>
+                <input type="number" id="stdCost" placeholder="2.10" step="0.01">
+              </div>
+              <div class="input-row">
+                <label>实际成本 (元/W):</label>
+                <input type="number" id="actualCost" placeholder="2.25" step="0.01">
+              </div>
+              <div class="input-row">
+                <label>产量 (MW):</label>
+                <input type="number" id="prodVolume" placeholder="1000">
+              </div>
+              <div class="input-row">
+                <label>分析期间:</label>
+                <input type="month" id="variancePeriod" value="2026-03">
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button id="varianceBtn" class="btn btn-primary">
+                <span class="btn-icon">📊</span> 分析差异
+              </button>
+              <button class="btn btn-secondary" onclick="loadVarianceExample()">
+                <span class="btn-icon">📋</span> 加载示例
+              </button>
+            </div>
+          </div>
 
-      &lt;div class=&quot;result-section&quot; id=&quot;varianceResultSection&quot; style=&quot;display: none;&quot;&gt;
-        &lt;div class=&quot;result-header&quot;&gt;
-          &lt;h2 class=&quot;section-title&quot;&gt;差异分析结果&lt;/h2&gt;
-          &lt;div class=&quot;result-actions&quot;&gt;
-            &lt;button class=&quot;btn btn-sm btn-secondary&quot; onclick=&quot;exportVariance(&#39;pdf&#39;)&quot;&gt;📄 PDF&lt;/button&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div id=&quot;varianceResultContent&quot;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
+          <div class="result-section" id="varianceResultSection" style="display: none;">
+            <div class="result-header">
+              <h2 class="section-title">差异分析结果</h2>
+              <div class="result-actions">
+                <button class="btn btn-sm btn-secondary" onclick="exportVariance('pdf')">📄 PDF</button>
+              </div>
+            </div>
+            <div id="varianceResultContent"></div>
+          </div>
+        </div>
 
-    &lt;!-- 敏感性分析面板 --&gt;
-    &lt;div class=&quot;tab-panel&quot; id=&quot;sensitivity-panel&quot;&gt;
-      &lt;div class=&quot;input-section&quot;&gt;
-        &lt;h2 class=&quot;section-title&quot;&gt;价格敏感性分析&lt;/h2&gt;
-        &lt;div class=&quot;sensitivity-intro&quot;&gt;
-          分析原材料价格波动对产品成本的影响程度
-        &lt;/div&gt;
-        &lt;div class=&quot;sensitivity-options&quot;&gt;
-          &lt;div class=&quot;option-group&quot;&gt;
-            &lt;label&gt;基准成本 (元/W):&lt;/label&gt;
-            &lt;input type=&quot;number&quot; id=&quot;baseCost&quot; placeholder=&quot;0.85&quot; step=&quot;0.01&quot; value=&quot;0.85&quot;&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;option-group&quot;&gt;
-            &lt;label&gt;波动范围:&lt;/label&gt;
-            &lt;select id=&quot;sensitivityRange&quot;&gt;
-              &lt;option value=&quot;10&quot;&gt;±10%&lt;/option&gt;
-              &lt;option value=&quot;20&quot; selected&gt;±20%&lt;/option&gt;
-              &lt;option value=&quot;30&quot;&gt;±30%&lt;/option&gt;
-              &lt;option value=&quot;50&quot;&gt;±50%&lt;/option&gt;
-            &lt;/select&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;sensitivity-factors&quot;&gt;
-          &lt;div class=&quot;factor-title&quot;&gt;选择分析因素：&lt;/div&gt;
-          &lt;div class=&quot;factor-checkboxes&quot; id=&quot;sensitivityFactors&quot;&gt;
-            &lt;label class=&quot;checkbox-label&quot;&gt;
-              &lt;input type=&quot;checkbox&quot; value=&quot;wafer&quot; checked&gt; 硅片价格
-            &lt;/label&gt;
-            &lt;label class=&quot;checkbox-label&quot;&gt;
-              &lt;input type=&quot;checkbox&quot; value=&quot;silver&quot; checked&gt; 银浆价格
-            &lt;/label&gt;
-            &lt;label class=&quot;checkbox-label&quot;&gt;
-              &lt;input type=&quot;checkbox&quot; value=&quot;aluminum&quot;&gt; 铝浆价格
-            &lt;/label&gt;
-            &lt;label class=&quot;checkbox-label&quot;&gt;
-              &lt;input type=&quot;checkbox&quot; value=&quot;cell&quot;&gt; 电池片价格
-            &lt;/label&gt;
-            &lt;label class=&quot;checkbox-label&quot;&gt;
-              &lt;input type=&quot;checkbox&quot; value=&quot;glass&quot;&gt; 玻璃价格
-            &lt;/label&gt;
-            &lt;label class=&quot;checkbox-label&quot;&gt;
-              &lt;input type=&quot;checkbox&quot; value=&quot;eva&quot;&gt; EVA胶膜价格
-            &lt;/label&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;textarea 
-          id=&quot;sensitivityInput&quot; 
-          class=&quot;input-textarea&quot; 
-          placeholder=&quot;例如：如果硅片价格上涨20%，对PERC电池片成本的影响&quot;
-        &gt;&lt;/textarea&gt;
-        &lt;div class=&quot;action-buttons&quot;&gt;
-          &lt;button id=&quot;sensitivityBtn&quot; class=&quot;btn btn-primary&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;📈&lt;/span&gt; 计算敏感度
-          &lt;/button&gt;
-          &lt;button class=&quot;btn btn-secondary&quot; onclick=&quot;loadSensitivityExample()&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;📋&lt;/span&gt; 加载示例
-          &lt;/button&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+        <!-- 敏感性分析面板 -->
+        <div class="tab-panel" id="sensitivity-panel">
+          <div class="input-section">
+            <h2 class="section-title">价格敏感性分析</h2>
+            <div class="sensitivity-intro">
+              分析原材料价格波动对产品成本的影响程度
+            </div>
+            <div class="sensitivity-options">
+              <div class="option-group">
+                <label>基准成本 (元/W):</label>
+                <input type="number" id="baseCost" placeholder="0.85" step="0.01" value="0.85">
+              </div>
+              <div class="option-group">
+                <label>波动范围:</label>
+                <select id="sensitivityRange">
+                  <option value="10">±10%</option>
+                  <option value="20" selected>±20%</option>
+                  <option value="30">±30%</option>
+                  <option value="50">±50%</option>
+                </select>
+              </div>
+            </div>
+            <div class="sensitivity-factors">
+              <div class="factor-title">选择分析因素：</div>
+              <div class="factor-checkboxes" id="sensitivityFactors">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="wafer" checked> 硅片价格
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="silver" checked> 银浆价格
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="aluminum"> 铝浆价格
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="cell"> 电池片价格
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="glass"> 玻璃价格
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="eva"> EVA胶膜价格
+                </label>
+              </div>
+            </div>
+            <textarea 
+              id="sensitivityInput" 
+              class="input-textarea" 
+              placeholder="例如：如果硅片价格上涨20%，对PERC电池片成本的影响"
+            ></textarea>
+            <div class="action-buttons">
+              <button id="sensitivityBtn" class="btn btn-primary">
+                <span class="btn-icon">📈</span> 计算敏感度
+              </button>
+              <button class="btn btn-secondary" onclick="loadSensitivityExample()">
+                <span class="btn-icon">📋</span> 加载示例
+              </button>
+            </div>
+          </div>
 
-      &lt;div class=&quot;result-section&quot; id=&quot;sensitivityResultSection&quot; style=&quot;display: none;&quot;&gt;
-        &lt;div class=&quot;result-header&quot;&gt;
-          &lt;h2 class=&quot;section-title&quot;&gt;敏感性分析结果&lt;/h2&gt;
-        &lt;/div&gt;
-        &lt;div id=&quot;sensitivityResultContent&quot;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
+          <div class="result-section" id="sensitivityResultSection" style="display: none;">
+            <div class="result-header">
+              <h2 class="section-title">敏感性分析结果</h2>
+            </div>
+            <div id="sensitivityResultContent"></div>
+          </div>
+        </div>
 
-    &lt;!-- 成本对比面板 --&gt;
-    &lt;div class=&quot;tab-panel&quot; id=&quot;compare-panel&quot;&gt;
-      &lt;div class=&quot;input-section&quot;&gt;
-        &lt;h2 class=&quot;section-title&quot;&gt;多场景成本对比&lt;/h2&gt;
-        &lt;div class=&quot;compare-intro&quot;&gt;
-          对比不同技术路线、不同规格或不同时间的成本差异
-        &lt;/div&gt;
-        &lt;div class=&quot;compare-scenarios&quot;&gt;
-          &lt;div class=&quot;scenario-card&quot;&gt;
-            &lt;h4&gt;场景 A&lt;/h4&gt;
-            &lt;select id=&quot;compareTypeA&quot;&gt;
-              &lt;option value=&quot;PERC-182&quot;&gt;PERC 182mm&lt;/option&gt;
-              &lt;option value=&quot;PERC-210&quot;&gt;PERC 210mm&lt;/option&gt;
-              &lt;option value=&quot;TOPCon-182&quot;&gt;TOPCon 182mm&lt;/option&gt;
-              &lt;option value=&quot;TOPCon-210&quot;&gt;TOPCon 210mm&lt;/option&gt;
-              &lt;option value=&quot;HJT-210&quot;&gt;HJT 210mm&lt;/option&gt;
-            &lt;/select&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;scenario-vs&quot;&gt;VS&lt;/div&gt;
-          &lt;div class=&quot;scenario-card&quot;&gt;
-            &lt;h4&gt;场景 B&lt;/h4&gt;
-            &lt;select id=&quot;compareTypeB&quot;&gt;
-              &lt;option value=&quot;PERC-182&quot;&gt;PERC 182mm&lt;/option&gt;
-              &lt;option value=&quot;PERC-210&quot; selected&gt;PERC 210mm&lt;/option&gt;
-              &lt;option value=&quot;TOPCon-182&quot;&gt;TOPCon 182mm&lt;/option&gt;
-              &lt;option value=&quot;TOPCon-210&quot;&gt;TOPCon 210mm&lt;/option&gt;
-              &lt;option value=&quot;HJT-210&quot;&gt;HJT 210mm&lt;/option&gt;
-            &lt;/select&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;action-buttons&quot;&gt;
-          &lt;button id=&quot;compareBtn&quot; class=&quot;btn btn-primary&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;⚖️&lt;/span&gt; 开始对比
-          &lt;/button&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+        <!-- 成本对比面板 -->
+        <div class="tab-panel" id="compare-panel">
+          <div class="input-section">
+            <h2 class="section-title">多场景成本对比</h2>
+            <div class="compare-intro">
+              对比不同技术路线、不同规格或不同时间的成本差异
+            </div>
+            <div class="compare-scenarios">
+              <div class="scenario-card">
+                <h4>场景 A</h4>
+                <select id="compareTypeA">
+                  <option value="PERC-182">PERC 182mm</option>
+                  <option value="PERC-210">PERC 210mm</option>
+                  <option value="TOPCon-182">TOPCon 182mm</option>
+                  <option value="TOPCon-210">TOPCon 210mm</option>
+                  <option value="HJT-210">HJT 210mm</option>
+                </select>
+              </div>
+              <div class="scenario-vs">VS</div>
+              <div class="scenario-card">
+                <h4>场景 B</h4>
+                <select id="compareTypeB">
+                  <option value="PERC-182">PERC 182mm</option>
+                  <option value="PERC-210" selected>PERC 210mm</option>
+                  <option value="TOPCon-182">TOPCon 182mm</option>
+                  <option value="TOPCon-210">TOPCon 210mm</option>
+                  <option value="HJT-210">HJT 210mm</option>
+                </select>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button id="compareBtn" class="btn btn-primary">
+                <span class="btn-icon">⚖️</span> 开始对比
+              </button>
+            </div>
+          </div>
 
-      &lt;div class=&quot;result-section&quot; id=&quot;compareResultSection&quot; style=&quot;display: none;&quot;&gt;
-        &lt;h2 class=&quot;section-title&quot;&gt;对比结果&lt;/h2&gt;
-        &lt;div id=&quot;compareResultContent&quot;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
+          <div class="result-section" id="compareResultSection" style="display: none;">
+            <h2 class="section-title">对比结果</h2>
+            <div id="compareResultContent"></div>
+          </div>
+        </div>
 
-    &lt;!-- 历史记录面板 --&gt;
-    &lt;div class=&quot;tab-panel&quot; id=&quot;history-panel&quot;&gt;
-      &lt;div class=&quot;history-header&quot;&gt;
-        &lt;h2 class=&quot;section-title&quot;&gt;分析历史&lt;/h2&gt;
-        &lt;div class=&quot;history-actions&quot;&gt;
-          &lt;button class=&quot;btn btn-sm btn-secondary&quot; onclick=&quot;clearAllHistory()&quot;&gt;
-            &lt;span class=&quot;btn-icon&quot;&gt;🗑️&lt;/span&gt; 清空历史
-          &lt;/button&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div id=&quot;historyList&quot; class=&quot;history-list&quot;&gt;
-        &lt;p class=&quot;empty-tip&quot;&gt;暂无历史记录&lt;/p&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/section&gt;
-&lt;/main&gt;
+        <!-- 历史记录面板 -->
+        <div class="tab-panel" id="history-panel">
+          <div class="history-header">
+            <h2 class="section-title">分析历史</h2>
+            <div class="history-actions">
+              <button class="btn btn-sm btn-secondary" onclick="clearAllHistory()">
+                <span class="btn-icon">🗑️</span> 清空历史
+              </button>
+            </div>
+          </div>
+          <div id="historyList" class="history-list">
+            <p class="empty-tip">暂无历史记录</p>
+          </div>
+        </div>
+      </section>
+    </main>
 
-&lt;!-- 加载遮罩 --&gt;
-&lt;div id=&quot;loadingMask&quot; class=&quot;loading-mask&quot; style=&quot;display: none;&quot;&gt;
-  &lt;div class=&quot;loading-content&quot;&gt;
-    &lt;div class=&quot;loading-spinner&quot;&gt;&lt;/div&gt;
-    &lt;p&gt;正在分析中...&lt;/p&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
+    <!-- 加载遮罩 -->
+    <div id="loadingMask" class="loading-mask" style="display: none;">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p>正在分析中...</p>
+      </div>
+    </div>
 
-&lt;!-- Toast 提示 --&gt;
-&lt;div id=&quot;toast&quot; class=&quot;toast&quot; style=&quot;display: none;&quot;&gt;&lt;/div&gt;
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast" style="display: none;"></div>
 
-&lt;!-- 底部说明 --&gt;
-&lt;footer class=&quot;app-footer&quot;&gt;
-  &lt;div class=&quot;footer-content&quot;&gt;
-    &lt;p&gt;
-      &lt;strong&gt;光伏成本智能分析助手&lt;/strong&gt; - 专为光伏行业成本会计设计
-    &lt;/p&gt;
-    &lt;p class=&quot;footer-links&quot;&gt;
-      &lt;a href=&quot;https://zoengsang.cloud&quot; target=&quot;_blank&quot;&gt;技术博客&lt;/a&gt; |
-      &lt;a href=&quot;https://github.com/nidenuoyan&quot; target=&quot;_blank&quot;&gt;GitHub&lt;/a&gt; |
-      &lt;span&gt;数据仅供参考，不构成投资建议&lt;/span&gt;
-    &lt;/p&gt;
-  &lt;/div&gt;
-&lt;/footer&gt;
-</code></pre>
+    <!-- 底部说明 -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p>
+          <strong>光伏成本智能分析助手</strong> - 专为光伏行业成本会计设计
+        </p>
+        <p class="footer-links">
+          <a href="https://zoengsang.cloud" target="_blank">技术博客</a> |
+          <a href="https://github.com/nidenuoyan" target="_blank">GitHub</a> |
+          <span>数据仅供参考，不构成投资建议</span>
+        </p>
+      </div>
+    </footer>
   </div>
 
   <script src="/factor-generator/app.js"></script>
