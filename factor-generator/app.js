@@ -20,6 +20,11 @@ let charts = {};
 // 扩展的原材料价格数据库（基于2024-2025年市场行情）
 const materialPricesDB = {
   // === 硅片价格（PVinfolink 2024年底-2025年初行情）===
+  // 后端 API key 对应
+  'wafer_m10': { name: 'N型M10硅片(182mm)', price: 1.08, unit: '元/片', trend: 'down', change: -3.0, source: 'PVinfolink' },
+  'wafer_g12r': { name: 'N型G12R硅片(182*210mm)', price: 1.18, unit: '元/片', trend: 'down', change: -2.5, source: 'PVinfolink' },
+  'wafer_g12': { name: 'N型G12硅片(210mm)', price: 1.40, unit: '元/片', trend: 'stable', change: 0, source: 'PVinfolink' },
+  // 兼容旧版显示名称
   'M10硅片(182mm)': { price: 1.15, unit: '元/片', trend: 'down', change: -5.0, source: 'PVinfolink' },
   'G12硅片(210mm)': { price: 1.70, unit: '元/片', trend: 'down', change: -4.5, source: 'PVinfolink' },
   'M6硅片(166mm)': { price: 1.05, unit: '元/片', trend: 'stable', change: -2.0, source: 'PVinfolink' },
@@ -27,6 +32,10 @@ const materialPricesDB = {
   'N型G12硅片': { price: 1.85, unit: '元/片', trend: 'down', change: -3.0, source: 'PVinfolink' },
   
   // === 银浆价格（上海有色金属网 2024年底行情）===
+  // 后端 API key 对应
+  'silver_front': { name: '正银浆', price: 7850, unit: '元/kg', trend: 'up', change: 2.5, source: '上海有色金属网' },
+  'silver_back': { name: '背银浆', price: 5200, unit: '元/kg', trend: 'up', change: 1.8, source: '上海有色金属网' },
+  // 兼容旧版显示名称
   '正银浆': { price: 7850, unit: '元/kg', trend: 'up', change: 8.5, source: '上海有色金属网' },
   '背银浆': { price: 5200, unit: '元/kg', trend: 'up', change: 6.2, source: '上海有色金属网' },
   '银浆(国产)': { price: 7200, unit: '元/kg', trend: 'up', change: 5.5, source: '上海有色金属网' },
@@ -38,6 +47,10 @@ const materialPricesDB = {
   'N型硅料': { price: 42, unit: '元/kg', trend: 'down', change: -2.0, source: 'PVinfolink' },
   
   // === 电池片价格（PVinfolink 2024年底-2025年初）===
+  // 后端 API key 对应
+  'cell_topcon_182': { name: '电池片(TOPCon-182)', price: 0.31, unit: '元/W', trend: 'down', change: -3.0, source: 'PVinfolink' },
+  'cell_topcon_210': { name: '电池片(TOPCon-210)', price: 0.42, unit: '元/W', trend: 'down', change: -2.5, source: 'PVinfolink' },
+  // 兼容旧版显示名称
   '电池片(PERC-182)': { price: 0.28, unit: '元/W', trend: 'down', change: -3.5, source: 'PVinfolink' },
   '电池片(PERC-210)': { price: 0.27, unit: '元/W', trend: 'down', change: -3.8, source: 'PVinfolink' },
   '电池片(TOPCon-182)': { price: 0.30, unit: '元/W', trend: 'down', change: -4.2, source: 'PVinfolink' },
@@ -110,7 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initButtons();
   initSearch();
-  loadMaterialPrices();
+  
+  // 从 API 获取最新价格，然后加载
+  refreshPrices().then(() => {
+    loadMaterialPrices();
+  }).catch(() => {
+    // 如果 API 失败，使用本地数据
+    loadMaterialPrices();
+  });
+  
   renderHistory();
   initCharts();
 });
@@ -225,16 +246,18 @@ function renderMaterialList(materials) {
   const container = document.getElementById('materialPrices');
   if (!container) return;
   
-  container.innerHTML = materials.map(([name, data]) => {
+  container.innerHTML = materials.map(([key, data]) => {
+    // 优先使用 data.name，如果不存在则使用 key
+    const displayName = data.name || key;
     const trendIcon = data.trend === 'up' ? '📈' : data.trend === 'down' ? '📉' : '➡️';
     const trendClass = data.trend === 'up' ? 'up' : data.trend === 'down' ? 'down' : '';
     const changeText = data.change > 0 ? `+${data.change}%` : `${data.change}%`;
     const sourceIcon = data.source === 'PVinfolink' ? '🔷' : data.source === '上海有色金属网' ? '🔶' : '📊';
     
     return `
-      <div class="price-item" title="${name} - 来源: ${data.source || '本地'}">
+      <div class="price-item" title="${displayName} - 来源: ${data.source || '本地'}">
         <div>
-          <span class="price-name">${name}</span>
+          <span class="price-name">${displayName}</span>
           <small style="display: block; color: #999; font-size: 10px; margin-top: 2px;">
             ${sourceIcon} ${data.source || '本地'}
           </small>
@@ -292,7 +315,6 @@ async function fetchPricesFromAPI() {
       headers: {
         'Accept': 'application/json',
       },
-      // 添加超时
       signal: AbortSignal.timeout(10000)
     });
     
@@ -303,12 +325,17 @@ async function fetchPricesFromAPI() {
     const result = await response.json();
     
     if (result.success && result.data) {
-      // 转换 API 数据格式到本地格式
+      // 转换 API 数据格式到本地格式 - 根据 name 字段匹配
       Object.keys(result.data).forEach(key => {
         const item = result.data[key];
-        if (materialPricesDB[key]) {
-          materialPricesDB[key] = {
-            ...materialPricesDB[key],
+        // 根据 name 查找前端对应的数据项
+        const localKey = Object.keys(materialPricesDB).find(k => 
+          materialPricesDB[k].name === item.name || k === item.name
+        );
+        
+        if (localKey) {
+          materialPricesDB[localKey] = {
+            ...materialPricesDB[localKey],
             price: item.price,
             trend: item.trend || 'stable',
             change: item.change || 0,
