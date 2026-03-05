@@ -17,10 +17,10 @@ https://zoengsang.cloud/tags/Python-%E5%AD%A6%E4%B9%A0/
 https://zoengsang.cloud/tags/DeepSeek/
 https://zoengsang.cloud/tags/AI/
 https://zoengsang.cloud/tags/Flask/
+https://zoengsang.cloud/tags/%E4%BB%85%E7%94%A8%E4%BA%8E%E5%AD%A6%E4%B9%A0/
 https://zoengsang.cloud/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/
 https://zoengsang.cloud/tags/SQL/
 https://zoengsang.cloud/tags/MySQL/
-https://zoengsang.cloud/tags/%E4%BB%85%E7%94%A8%E4%BA%8E%E5%AD%A6%E4%B9%A0/
 https://zoengsang.cloud/tags/%E6%B1%82%E8%81%8C/
 https://zoengsang.cloud/tags/%E4%BD%9C%E5%93%81%E9%9B%86/
 https://zoengsang.cloud/tags/Python/
@@ -29,5 +29,5 @@ https://zoengsang.cloud/tags/Pandas/
 https://zoengsang.cloud/tags/%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/
 https://zoengsang.cloud/tags/%E7%94%B5%E5%95%86%E5%88%86%E6%9E%90/
 https://zoengsang.cloud/categories/Python/
-https://zoengsang.cloud/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/
 https://zoengsang.cloud/categories/%E5%9B%BE%E7%89%87/
+https://zoengsang.cloud/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/
