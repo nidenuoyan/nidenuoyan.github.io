@@ -14,44 +14,54 @@ let sessionHistory = JSON.parse(localStorage.getItem('cost_history') || '[]');
 // 图表实例
 let charts = {};
 
-// 扩展的原材料价格数据库
+// 扩展的原材料价格数据库（基于2024-2025年市场行情）
 const materialPricesDB = {
-  'M10硅片': { price: 3.50, unit: '元/片', trend: 'down', change: -2.5, source: 'PVinfolink' },
-  'G12硅片': { price: 4.80, unit: '元/片', trend: 'down', change: -3.0, source: 'PVinfolink' },
-  'M6硅片': { price: 2.80, unit: '元/片', trend: 'stable', change: 0, source: 'PVinfolink' },
-  '正银浆': { price: 7500, unit: '元/kg', trend: 'up', change: 5.2, source: '上海有色金属网' },
-  '背银浆': { price: 4800, unit: '元/kg', trend: 'up', change: 4.8, source: '上海有色金属网' },
-  '银浆(国产)': { price: 6800, unit: '元/kg', trend: 'up', change: 3.5, source: '上海有色金属网' },
-  '铝浆': { price: 18, unit: '元/kg', trend: 'stable', change: 0.5, source: '上海有色金属网' },
-  '单晶硅': { price: 45, unit: '元/kg', trend: 'down', change: -1.2, source: 'PVinfolink' },
-  '多晶硅': { price: 55, unit: '元/kg', trend: 'down', change: -0.8, source: 'PVinfolink' },
-  '硅料(致密料)': { price: 52, unit: '元/kg', trend: 'down', change: -1.5, source: 'PVinfolink' },
-  '硅料(菜花料)': { price: 42, unit: '元/kg', trend: 'down', change: -2.0, source: 'PVinfolink' },
-  '电池片(PERC-182)': { price: 0.38, unit: '元/W', trend: 'down', change: -1.8, source: 'PVinfolink' },
-  '电池片(PERC-210)': { price: 0.37, unit: '元/W', trend: 'down', change: -2.0, source: 'PVinfolink' },
-  '电池片(TOPCon-182)': { price: 0.45, unit: '元/W', trend: 'down', change: -1.5, source: 'PVinfolink' },
-  '电池片(TOPCon-210)': { price: 0.43, unit: '元/W', trend: 'down', change: -1.2, source: 'PVinfolink' },
-  '电池片(BC-182)': { price: 0.48, unit: '元/W', trend: 'down', change: -1.0, source: 'PVinfolink' },
-  '电池片(BC-210)': { price: 0.46, unit: '元/W', trend: 'down', change: -0.8, source: 'PVinfolink' },
-  '电池片(HJT-210)': { price: 0.58, unit: '元/W', trend: 'down', change: -1.2, source: 'PVinfolink' },
-  '光伏玻璃(3.2mm)': { price: 26, unit: '元/㎡', trend: 'stable', change: 0, source: 'PVinfolink' },
-  '光伏玻璃(2.0mm)': { price: 18, unit: '元/㎡', trend: 'stable', change: 0, source: 'PVinfolink' },
-  'EVA胶膜': { price: 7.5, unit: '元/㎡', trend: 'up', change: 2.1, source: '上海有色金属网' },
-  'POE胶膜': { price: 12, unit: '元/㎡', trend: 'stable', change: 0.5, source: '上海有色金属网' },
-  '背板': { price: 8.5, unit: '元/㎡', trend: 'down', change: -0.5, source: 'PVinfolink' },
-  '边框(铝)': { price: 22, unit: '元/套', trend: 'up', change: 1.2, source: '上海有色金属网' },
-  '接线盒': { price: 15, unit: '元/个', trend: 'stable', change: 0, source: 'PVinfolink' },
-  '焊带': { price: 85, unit: '元/kg', trend: 'up', change: 3.0, source: '上海有色金属网' },
-  '助焊剂': { price: 25, unit: '元/L', trend: 'stable', change: 0, source: 'PVinfolink' },
-  '化学品(氢氟酸)': { price: 8, unit: '元/L', trend: 'stable', change: 0.2, source: 'PVinfolink' },
-  '化学品(硝酸)': { price: 6, unit: '元/L', trend: 'stable', change: 0.1, source: 'PVinfolink' },
-  '化学品(盐酸)': { price: 3, unit: '元/L', trend: 'stable', change: 0, source: 'PVinfolink' },
-  '化学品(氢氧化钾)': { price: 12, unit: '元/kg', trend: 'up', change: 1.5, source: '上海有色金属网' },
-  '网版': { price: 850, unit: '元/个', trend: 'down', change: -5.0, source: 'PVinfolink' },
-  '石英舟': { price: 2800, unit: '元/个', trend: 'stable', change: 0, source: 'PVinfolink' },
-  '碳化硅舟': { price: 3500, unit: '元/个', trend: 'stable', change: 0, source: 'PVinfolink' },
-  '靶材(ITO)': { price: 15000, unit: '元/套', trend: 'down', change: -2.0, source: 'PVinfolink' },
-  '靶材(TCO)': { price: 18000, unit: '元/套', trend: 'down', change: -1.5, source: 'PVinfolink' }
+  // === 硅片价格（PVinfolink 2024年底-2025年初行情）===
+  'M10硅片(182mm)': { price: 1.15, unit: '元/片', trend: 'down', change: -5.0, source: 'PVinfolink' },
+  'G12硅片(210mm)': { price: 1.70, unit: '元/片', trend: 'down', change: -4.5, source: 'PVinfolink' },
+  'M6硅片(166mm)': { price: 1.05, unit: '元/片', trend: 'stable', change: -2.0, source: 'PVinfolink' },
+  'N型M10硅片': { price: 1.25, unit: '元/片', trend: 'down', change: -3.5, source: 'PVinfolink' },
+  'N型G12硅片': { price: 1.85, unit: '元/片', trend: 'down', change: -3.0, source: 'PVinfolink' },
+  
+  // === 银浆价格（上海有色金属网 2024年底行情）===
+  '正银浆': { price: 7850, unit: '元/kg', trend: 'up', change: 8.5, source: '上海有色金属网' },
+  '背银浆': { price: 5200, unit: '元/kg', trend: 'up', change: 6.2, source: '上海有色金属网' },
+  '银浆(国产)': { price: 7200, unit: '元/kg', trend: 'up', change: 5.5, source: '上海有色金属网' },
+  '铝浆': { price: 22, unit: '元/kg', trend: 'stable', change: 1.0, source: '上海有色金属网' },
+  
+  // === 硅料价格（PVinfolink）===
+  '硅料(致密料)': { price: 38, unit: '元/kg', trend: 'down', change: -2.5, source: 'PVinfolink' },
+  '硅料(菜花料)': { price: 32, unit: '元/kg', trend: 'down', change: -3.0, source: 'PVinfolink' },
+  'N型硅料': { price: 42, unit: '元/kg', trend: 'down', change: -2.0, source: 'PVinfolink' },
+  
+  // === 电池片价格（PVinfolink 2024年底-2025年初）===
+  '电池片(PERC-182)': { price: 0.28, unit: '元/W', trend: 'down', change: -3.5, source: 'PVinfolink' },
+  '电池片(PERC-210)': { price: 0.27, unit: '元/W', trend: 'down', change: -3.8, source: 'PVinfolink' },
+  '电池片(TOPCon-182)': { price: 0.30, unit: '元/W', trend: 'down', change: -4.2, source: 'PVinfolink' },
+  '电池片(TOPCon-210)': { price: 0.29, unit: '元/W', trend: 'down', change: -4.0, source: 'PVinfolink' },
+  '电池片(BC-182)': { price: 0.35, unit: '元/W', trend: 'down', change: -2.5, source: 'PVinfolink' },
+  '电池片(HJT-210)': { price: 0.42, unit: '元/W', trend: 'down', change: -3.0, source: 'PVinfolink' },
+  
+  // === 光伏玻璃（PVinfolink）===
+  '光伏玻璃(3.2mm)': { price: 22, unit: '元/㎡', trend: 'down', change: -1.5, source: 'PVinfolink' },
+  '光伏玻璃(2.0mm)': { price: 14, unit: '元/㎡', trend: 'down', change: -2.0, source: 'PVinfolink' },
+  
+  // === 胶膜（上海有色金属网/行业报价）===
+  'EVA胶膜': { price: 6.8, unit: '元/㎡', trend: 'down', change: -1.5, source: '上海有色金属网' },
+  'POE胶膜': { price: 10.5, unit: '元/㎡', trend: 'down', change: -2.0, source: '上海有色金属网' },
+  
+  // === 其他材料 ===
+  '背板': { price: 7.5, unit: '元/㎡', trend: 'down', change: -1.0, source: 'PVinfolink' },
+  '边框(铝)': { price: 18, unit: '元/套', trend: 'down', change: -2.5, source: '上海有色金属网' },
+  '接线盒': { price: 12, unit: '元/个', trend: 'down', change: -1.2, source: 'PVinfolink' },
+  '焊带': { price: 78, unit: '元/kg', trend: 'down', change: -1.5, source: '上海有色金属网' },
+  '助焊剂': { price: 22, unit: '元/L', trend: 'stable', change: 0, source: 'PVinfolink' },
+  '化学品(氢氟酸)': { price: 7.5, unit: '元/L', trend: 'stable', change: 0.2, source: 'PVinfolink' },
+  '化学品(硝酸)': { price: 5.8, unit: '元/L', trend: 'stable', change: 0.1, source: 'PVinfolink' },
+  '网版': { price: 750, unit: '元/个', trend: 'down', change: -3.0, source: 'PVinfolink' },
+  '石英舟': { price: 2500, unit: '元/个', trend: 'down', change: -2.0, source: 'PVinfolink' },
+  '靶材(ITO)': { price: 13500, unit: '元/套', trend: 'down', change: -3.0, source: 'PVinfolink' },
+  '靶材(TCO)': { price: 16500, unit: '元/套', trend: 'down', change: -2.5, source: 'PVinfolink' }
 };
 
 // 在线数据源配置
@@ -68,28 +78,28 @@ const priceDataSources = {
   }
 };
 
-// 常用模板
+// 常用模板（基于2024年底-2025年初市场行情）
 const templates = {
-  perc_cost: '计算PERC电池片(182mm)单位成本，硅片3.5元/片，正银浆110mg/片，背银浆80mg/片，良率98%',
-  topcon_cost: '计算TOPCon电池片(182mm)单位成本，硅片3.5元/片，正银浆100mg/片，背银浆60mg/片，良率96%',
-  hjt_cost: '计算HJT电池片(210mm)单位成本，硅片4.8元/片，低温银浆180mg/片，靶材成本0.05元/W，良率94%',
-  bc_cost: '计算BC电池片(182mm)单位成本，硅片3.8元/片，银浆90mg/片，无背银浆，良率95%',
-  module_182: '分析182组件成本，电池片成本0.35元/W，功率550W，玻璃3.2mm，EVA胶膜',
-  module_210: '分析210组件成本，电池片成本0.37元/W，功率660W，玻璃2.0mm，POE胶膜',
-  variance_analysis: '分析本月成本涨价原因，标准成本2.1元/W，实际成本2.25元/W，产量1000MW',
-  wafer_impact: '如果硅片价格从3.5元上涨到4.2元，对PERC电池片成本的影响有多大？',
-  silver_impact: '分析银浆价格波动对TOPCon电池片成本的影响，当前银浆价格7500元/kg'
+  perc_cost: '计算PERC电池片(182mm)单位成本，M10硅片1.15元/片，正银浆110mg/片，背银浆80mg/片，良率98%',
+  topcon_cost: '计算TOPCon电池片(182mm)单位成本，N型M10硅片1.25元/片，正银浆100mg/片，背银浆60mg/片，良率96%',
+  hjt_cost: '计算HJT电池片(210mm)单位成本，N型G12硅片1.85元/片，低温银浆180mg/片，靶材成本0.04元/W，良率94%',
+  bc_cost: '计算BC电池片(182mm)单位成本，N型M10硅片1.25元/片，银浆90mg/片，无背银浆，良率95%',
+  module_182: '分析182组件成本，电池片成本0.28元/W，功率550W，玻璃3.2mm，EVA胶膜',
+  module_210: '分析210组件成本，电池片成本0.29元/W，功率660W，玻璃2.0mm，POE胶膜',
+  variance_analysis: '分析本月成本涨价原因，标准成本0.35元/W，实际成本0.38元/W，产量1000MW',
+  wafer_impact: '如果M10硅片价格从1.15元上涨到1.35元，对PERC电池片成本的影响有多大？',
+  silver_impact: '分析银浆价格波动对TOPCon电池片成本的影响，当前银浆价格7850元/kg'
 };
 
-// 成本基准数据（用于对比功能）
+// 成本基准数据（用于对比功能，基于2024年底-2025年初行情）
 const costBaseline = {
-  'PERC-182': { cell: 0.38, module: 1.45, silver: 110, wafer: 3.5 },
-  'PERC-210': { cell: 0.37, module: 1.42, silver: 115, wafer: 4.8 },
-  'TOPCon-182': { cell: 0.45, module: 1.58, silver: 100, wafer: 3.5 },
-  'TOPCon-210': { cell: 0.43, module: 1.55, silver: 105, wafer: 4.8 },
-  'HJT-210': { cell: 0.58, module: 1.78, silver: 180, wafer: 4.8 },
-  'BC-182': { cell: 0.48, module: 1.62, silver: 90, wafer: 3.8 },
-  'BC-210': { cell: 0.46, module: 1.58, silver: 95, wafer: 5.2 }
+  'PERC-182': { cell: 0.28, module: 1.15, silver: 110, wafer: 1.15 },
+  'PERC-210': { cell: 0.27, module: 1.12, silver: 115, wafer: 1.70 },
+  'TOPCon-182': { cell: 0.30, module: 1.25, silver: 100, wafer: 1.25 },
+  'TOPCon-210': { cell: 0.29, module: 1.22, silver: 105, wafer: 1.85 },
+  'HJT-210': { cell: 0.42, module: 1.55, silver: 180, wafer: 1.85 },
+  'BC-182': { cell: 0.35, module: 1.35, silver: 90, wafer: 1.25 },
+  'BC-210': { cell: 0.33, module: 1.30, silver: 95, wafer: 1.85 }
 };
 
 // 初始化
@@ -278,55 +288,62 @@ async function simulateOnlinePriceFetch() {
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 800));
   
-  // 模拟从PVinfolink和上海有色金属网获取的最新价格
+  // 模拟从PVinfolink和上海有色金属网获取的最新价格（2024年底-2025年初行情）
   // 添加随机波动使数据更真实
   const onlineUpdates = {
-    'M10硅片': { 
-      price: 3.45, 
+    'M10硅片(182mm)': { 
+      price: 1.12, 
+      trend: 'down', 
+      change: -2.5,
+      source: 'PVinfolink',
+      updateTime: new Date().toISOString()
+    },
+    'G12硅片(210mm)': { 
+      price: 1.68, 
+      trend: 'down', 
+      change: -2.0,
+      source: 'PVinfolink',
+      updateTime: new Date().toISOString()
+    },
+    'N型M10硅片': { 
+      price: 1.22, 
+      trend: 'down', 
+      change: -1.8,
+      source: 'PVinfolink',
+      updateTime: new Date().toISOString()
+    },
+    '正银浆': { 
+      price: 7920, 
+      trend: 'up', 
+      change: 3.5,
+      source: '上海有色金属网',
+      updateTime: new Date().toISOString()
+    },
+    '硅料(致密料)': { 
+      price: 37.5, 
+      trend: 'down', 
+      change: -1.2,
+      source: 'PVinfolink',
+      updateTime: new Date().toISOString()
+    },
+    '电池片(PERC-182)': { 
+      price: 0.275, 
       trend: 'down', 
       change: -1.5,
       source: 'PVinfolink',
       updateTime: new Date().toISOString()
     },
-    'G12硅片': { 
-      price: 4.75, 
-      trend: 'down', 
-      change: -1.0,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    '正银浆': { 
-      price: 7650, 
-      trend: 'up', 
-      change: 2.0,
-      source: '上海有色金属网',
-      updateTime: new Date().toISOString()
-    },
-    '电池片(PERC-182)': { 
-      price: 0.375, 
-      trend: 'down', 
-      change: -1.3,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
     '电池片(TOPCon-182)': { 
-      price: 0.445, 
+      price: 0.295, 
       trend: 'down', 
-      change: -1.1,
+      change: -1.2,
       source: 'PVinfolink',
       updateTime: new Date().toISOString()
     },
-    '电池片(BC-182)': { 
-      price: 0.475, 
+    '光伏玻璃(3.2mm)': { 
+      price: 21.5, 
       trend: 'down', 
-      change: -1.0,
-      source: 'PVinfolink',
-      updateTime: new Date().toISOString()
-    },
-    '电池片(HJT-210)': { 
-      price: 0.575, 
-      trend: 'down', 
-      change: -0.9,
+      change: -0.8,
       source: 'PVinfolink',
       updateTime: new Date().toISOString()
     }
@@ -411,7 +428,16 @@ async function calculateCost() {
 
 // 生成模拟成本结果
 function generateMockCostResult(productType, cellType, sizeSpec) {
-  const baseCost = cellType === 'PERC' ? 0.38 : cellType === 'TOPCon' ? 0.45 : 0.58;
+  // 基于2024年底-2025年初市场行情的成本基准
+  const costMap = {
+    'PERC': { cell: 0.28, wafer: 0.08 },
+    'TOPCon': { cell: 0.30, wafer: 0.09 },
+    'HJT': { cell: 0.42, wafer: 0.12 },
+    'BC': { cell: 0.35, wafer: 0.10 }
+  };
+  
+  const baseData = costMap[cellType] || costMap['PERC'];
+  const baseCost = productType === 'cell' ? baseData.cell : baseData.cell + 0.85;
   
   return {
     success: true,
@@ -420,42 +446,45 @@ function generateMockCostResult(productType, cellType, sizeSpec) {
       unit_cost: baseCost,
       currency: '元/W',
       cost_breakdown: [
-        { item: '硅片', cost: productType === 'cell' ? 0.17 : 0.65, pct: 45, category: 'material' },
-        { item: '正银浆', cost: productType === 'cell' ? 0.05 : 0.18, pct: 12, category: 'material' },
-        { item: '背银浆', cost: productType === 'cell' ? 0.02 : 0.06, pct: 4, category: 'material' },
-        { item: '铝浆', productType: 'cell' ? 0.01 : 0.03, pct: 1.5, category: 'material' },
-        { item: '化学品', cost: 0.015, pct: 2, category: 'material' },
-        { item: '玻璃', cost: productType === 'module' ? 0.25 : 0, pct: productType === 'module' ? 6 : 0, category: 'material' },
-        { item: '胶膜', cost: productType === 'module' ? 0.15 : 0, pct: productType === 'module' ? 4 : 0, category: 'material' },
-        { item: '人工', cost: 0.03, pct: 4, category: 'labor' },
-        { item: '制造费用', cost: 0.045, pct: 5.5, category: 'overhead' },
-        { item: '其他', cost: 0.02, pct: 2.5, category: 'other' }
+        { item: '硅片', cost: productType === 'cell' ? baseData.wafer : 0.20, pct: productType === 'cell' ? 28 : 15, category: 'material' },
+        { item: '正银浆', cost: productType === 'cell' ? 0.06 : 0.15, pct: productType === 'cell' ? 18 : 12, category: 'material' },
+        { item: '背银浆', cost: productType === 'cell' && cellType !== 'BC' ? 0.025 : 0, pct: productType === 'cell' && cellType !== 'BC' ? 8 : 0, category: 'material' },
+        { item: '铝浆', cost: productType === 'cell' ? 0.008 : 0.02, pct: 3, category: 'material' },
+        { item: '化学品', cost: 0.012, pct: 4, category: 'material' },
+        { item: '玻璃', cost: productType === 'module' ? 0.18 : 0, pct: productType === 'module' ? 10 : 0, category: 'material' },
+        { item: '胶膜', cost: productType === 'module' ? 0.12 : 0, pct: productType === 'module' ? 7 : 0, category: 'material' },
+        { item: '人工', cost: 0.025, pct: 8, category: 'labor' },
+        { item: '制造费用', cost: 0.035, pct: 12, category: 'overhead' },
+        { item: '其他', cost: 0.015, pct: 5, category: 'other' }
       ],
       code: `# ${cellType} ${productType === 'cell' ? '电池片' : '组件'}成本计算
-# 基于${sizeSpec}mm规格
+# 基于${sizeSpec}mm规格（2024年底-2025年初行情）
+# 参考: M10硅片1.15元/片，G12硅片1.70元/片
 
 unit_cost = ${baseCost}  # 元/W
 
 # 成本构成
 cost_breakdown = {
-    '硅片': ${productType === 'cell' ? 0.17 : 0.65},
-    '银浆': ${productType === 'cell' ? 0.07 : 0.24},
-    '化学品': 0.015,
-    '人工': 0.03,
-    '制造费用': 0.045
+    '硅片': ${productType === 'cell' ? baseData.wafer : 0.20},
+    '银浆': ${productType === 'cell' ? (cellType === 'BC' ? 0.06 : 0.085) : 0.17},
+    '化学品': 0.012,
+    '人工': 0.025,
+    '制造费用': 0.035
 }
 
 print(f"单位成本: {unit_cost} 元/W")`,
       assumptions: [
-        '良率假设：PERC 98%, TOPCon 96%, HJT 94%',
-        '硅片价格基于当前市场均价',
-        '银浆耗量基于行业平均水平',
-        '制造费用包含折旧、能耗等'
+        `技术路线: ${cellType}，规格: ${sizeSpec}mm`,
+        '良率假设：PERC 98%, TOPCon 96%, HJT 94%, BC 95%',
+        '硅片价格参考PVinfolink（M10: 1.15元/片, G12: 1.70元/片）',
+        '银浆价格参考上海有色金属网（约7850元/kg）',
+        '制造费用包含折旧、能耗、人工等'
       ],
       suggestions: [
-        '建议优化银浆耗量以降低成本',
-        '可考虑采用大硅片提升功率降低成本',
-        '关注硅料价格波动对成本的影响'
+        '当前硅片价格处于历史低位，可关注供应链稳定性',
+        '银浆耗量是成本关键，建议优化印刷工艺',
+        cellType === 'BC' ? 'BC电池无背银浆，但正面银浆耗量较高' : '可考虑采用大硅片提升功率摊薄成本',
+        '关注N型硅片与P型硅片的价差变化'
       ]
     }
   };
@@ -634,16 +663,16 @@ function generateMockVarianceResult(std, actual, vol, variance, variancePct) {
       { factor: '其他因素', impact: variance * 0.1, pct: 10, direction: 'neutral' }
     ],
     reasons: [
-      { name: '硅片价格上涨', desc: '本月硅片采购价上涨 5%', impact: `+${(variance * 0.35).toFixed(3)} 元/W`, direction: 'up' },
-      { name: '银浆价格波动', desc: '银价上涨导致浆料成本增加', impact: `+${(variance * 0.15).toFixed(3)} 元/W`, direction: 'up' },
-      { name: '良率下降', desc: '本月良率从 98% 降至 96.5%', impact: `+${(variance * 0.2).toFixed(3)} 元/W`, direction: 'up' },
-      { name: '能耗控制改善', desc: '节能措施初见成效', impact: '-0.01 元/W', direction: 'down' }
+      { name: '硅片价格波动', desc: 'M10硅片从1.15元波动至1.25元/片', impact: `+${(variance * 0.35).toFixed(3)} 元/W`, direction: 'up' },
+      { name: '银浆价格上涨', desc: '银价上涨导致浆料成本增加', impact: `+${(variance * 0.15).toFixed(3)} 元/W`, direction: 'up' },
+      { name: '良率变化', desc: '本月良率波动影响单位成本', impact: `+${(variance * 0.2).toFixed(3)} 元/W`, direction: 'up' },
+      { name: '能耗控制', desc: '能耗优化措施效果', impact: '-0.008 元/W', direction: 'down' }
     ],
     recommendations: [
-      '与供应商协商锁定硅片长单价格',
-      '优化工艺参数提升良率至 97.5% 以上',
-      '考虑银包铜技术降低银浆成本',
-      '加强能耗监控，持续优化单位电耗'
+      '当前硅片价格处于低位（M10约1.15元/片），建议锁定长单',
+      '优化工艺参数提升良率至目标水平',
+      '关注银价走势，适时采购银浆',
+      '持续优化能耗，降低非硅成本'
     ]
   };
 }
@@ -845,16 +874,17 @@ async function analyzeSensitivity() {
 
 // 生成模拟敏感性分析结果
 function generateMockSensitivityResult(factors, range, baseCost) {
-  const base = parseFloat(baseCost || 0.85);
+  // 基于2024年底-2025年初行情（M10硅片1.15元/片，PERC电池片0.28元/W）
+  const base = parseFloat(baseCost || 0.28);
   const r = parseInt(range) / 100;
   
   const factorData = {
-    'wafer': { name: '硅片价格', impact: 0.45, baseParam: 3.5 },
-    'silver': { name: '银浆价格', impact: 0.18, baseParam: 7500 },
-    'aluminum': { name: '铝浆价格', impact: 0.03, baseParam: 18 },
-    'cell': { name: '电池片价格', impact: 0.70, baseParam: 0.38 },
-    'glass': { name: '玻璃价格', impact: 0.12, baseParam: 26 },
-    'eva': { name: 'EVA胶膜', impact: 0.06, baseParam: 7.5 }
+    'wafer': { name: '硅片价格', impact: 0.32, baseParam: 1.15 },
+    'silver': { name: '银浆价格', impact: 0.28, baseParam: 7850 },
+    'aluminum': { name: '铝浆价格', impact: 0.02, baseParam: 22 },
+    'cell': { name: '电池片价格', impact: 0.65, baseParam: 0.28 },
+    'glass': { name: '玻璃价格', impact: 0.10, baseParam: 22 },
+    'eva': { name: 'EVA胶膜', impact: 0.05, baseParam: 6.8 }
   };
   
   const selectedFactors = factors.length > 0 ? factors : ['wafer', 'silver'];
@@ -883,13 +913,14 @@ function generateMockSensitivityResult(factors, range, baseCost) {
       positive: d.sensitivity * r
     })),
     key_findings: [
-      `硅片价格是影响成本的最关键因素，每波动${range}%，成本变化约${(sensitivityData[0]?.sensitivity * r).toFixed(3)}元/W`,
-      '银浆价格对TOPCon和HJT技术影响更大',
-      '建议重点关注硅片长单锁价策略'
+      `当前M10硅片价格约${factorData['wafer'].baseParam}元/片，处于历史低位`,
+      `硅片价格每波动${range}%，成本变化约${(sensitivityData.find(s => s.factor === '硅片价格')?.sensitivity * r || 0).toFixed(3)}元/W`,
+      '银浆价格是TOPCon和HJT技术的关键成本因素',
+      '当前硅片价格低位，建议评估长单锁价策略'
     ],
     risk_assessment: {
-      high: ['硅片价格波动', '银价上涨'],
-      medium: ['汇率波动', '能耗成本'],
+      high: ['硅片价格反弹', '银价大幅上涨'],
+      medium: ['玻璃价格波动', '汇率波动'],
       low: ['铝浆价格', '化学品价格']
     }
   };
