@@ -67,7 +67,12 @@ async function loadPricesFromAPI() {
 // 渲染价格列表
 function renderPriceList() {
   const container = document.getElementById('materialPrices');
-  if (!container) return;
+  if (!container) {
+    console.error('[渲染] 找不到 materialPrices 容器');
+    return;
+  }
+  
+  console.log('[渲染] 数据条目:', Object.keys(priceData).length);
   
   // 按分类分组
   const byCategory = {};
@@ -77,18 +82,25 @@ function renderPriceList() {
     byCategory[cat].push(item);
   });
   
+  console.log('[渲染] 分类:', Object.keys(byCategory));
+  
   // 按预设顺序渲染
   let html = '';
   CATEGORY_ORDER.forEach(cat => {
-    if (byCategory[cat]) {
-      html += `<div class="category-header">${cat}</div>`;
+    if (byCategory[cat] && byCategory[cat].length > 0) {
+      html += `<div class="category-header" style="padding:10px 15px;background:#f5f5f5;font-weight:bold;border-left:3px solid #1890ff;margin-top:10px;">${cat}</div>`;
       byCategory[cat].forEach(item => {
         html += renderPriceItem(item);
       });
     }
   });
   
-  container.innerHTML = html || '<div style="padding:20px;text-align:center;color:#999;">暂无数据</div>';
+  if (!html) {
+    html = '<div style="padding:20px;text-align:center;color:#999;">暂无数据</div>';
+  }
+  
+  container.innerHTML = html;
+  console.log('[渲染] 完成，HTML长度:', html.length);
   
   // 更新时间显示
   const updateTime = document.getElementById('updateTime');
@@ -101,20 +113,21 @@ function renderPriceList() {
 function renderPriceItem(item) {
   const trendIcon = item.trend === 'up' ? '📈' : item.trend === 'down' ? '📉' : '➡️';
   const trendClass = item.trend === 'up' ? 'up' : item.trend === 'down' ? 'down' : '';
-  const highLow = item.high && item.low ? `<small>高:${item.high} 低:${item.low}</small>` : '';
+  const trendColor = item.trend === 'up' ? '#f5222d' : item.trend === 'down' ? '#52c41a' : '#999';
+  const highLow = item.high && item.low ? `<small style="color:#999">高:${item.high} 低:${item.low}</small>` : '';
   
   return `
-    <div class="price-item">
+    <div class="price-item" style="display:flex;justify-content:space-between;padding:12px 15px;border-bottom:1px solid #eee;align-items:center;">
       <div>
-        <span class="price-name">${item.name}</span>
-        <small style="display:block;color:#999;">${item.source || 'API'}</small>
+        <div style="font-weight:500;color:#333;">${item.name}</div>
+        <small style="color:#999;font-size:11px;">${item.source || 'API'}</small>
       </div>
       <div style="text-align:right">
-        <div>
-          <span class="price-value">${item.price}</span>
-          <span class="price-unit">${item.unit}</span>
+        <div style="font-size:16px;font-weight:bold;color:#1890ff;">
+          ${item.price}
+          <span style="font-size:12px;color:#666;font-weight:normal;">${item.unit}</span>
         </div>
-        <span class="price-trend ${trendClass}">${trendIcon}</span>
+        <div style="font-size:12px;color:${trendColor};">${trendIcon} ${item.trend || 'stable'}</div>
         ${highLow}
       </div>
     </div>
