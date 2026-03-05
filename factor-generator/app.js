@@ -10,8 +10,8 @@ const API_BASE_URL = 'https://factor.zoengsang.cloud';
 let priceData = {};
 let lastUpdate = null;
 
-// 分类排序
-const CATEGORY_ORDER = ['硅片', '电池片', '硅料', '银浆', '玻璃', '胶膜', '其他'];
+// 分类排序（匹配后端）
+const CATEGORY_ORDER = ['硅片', '电池片', '硅料', '银浆', '玻璃', '胶膜', '背板', '边框', '焊带', '电气', '靶材', '网版', '石英', '化学品', '铝浆', '金属', '其他'];
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
@@ -179,6 +179,30 @@ function displayCostResult(result) {
   
   if (!section || !content) return;
   
+  // 构建成本分解表格
+  let breakdownHtml = '';
+  if (result.breakdown) {
+    breakdownHtml = `
+      <div class="result-card">
+        <div class="result-title">📊 成本分解</div>
+        <table class="cost-table">
+          <thead>
+            <tr><th>项目</th><th>金额(元/W)</th><th>占比</th></tr>
+          </thead>
+          <tbody>
+            ${Object.entries(result.breakdown).map(([key, val]) => `
+              <tr>
+                <td>${key}</td>
+                <td class="text-right">${val}</td>
+                <td class="text-right">${((val/result.unit_cost)*100).toFixed(1)}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+  
   section.style.display = 'block';
   content.innerHTML = `
     <div class="metrics-grid">
@@ -187,10 +211,22 @@ function displayCostResult(result) {
         <div class="metric-value">${result.unit_cost}</div>
         <div class="metric-unit">${result.currency}</div>
       </div>
+      ${result.efficiency ? `
+      <div class="metric-card">
+        <div class="metric-label">转换效率</div>
+        <div class="metric-value">${result.efficiency}%</div>
+      </div>
+      ` : ''}
     </div>
+    ${breakdownHtml}
     <div class="result-card">
-      <div>电池片价格: ${result.cell_price} 元/W</div>
-      <div>硅片价格: ${result.wafer_price} 元/片</div>
+      <div class="result-title">ℹ️ 计算说明</div>
+      <ul style="color:var(--text-muted);padding-left:20px;">
+        <li>技术路线: <strong>${result.cell_type}</strong></li>
+        <li>尺寸规格: <strong>${result.size}mm</strong></li>
+        <li>银浆成本已按单片耗量计算</li>
+        <li>加工费包含人工、折旧、能耗等</li>
+      </ul>
     </div>
   `;
 }
@@ -207,6 +243,40 @@ function showLoading(msg) {
 function hideLoading() {
   const mask = document.getElementById('loadingMask');
   if (mask) mask.style.display = 'none';
+}
+
+// 模板定义
+const templates = {
+  perc_cost: '计算PERC电池片(182mm)单位成本，硅片价格1.08元/片，正银浆90mg/片，背银浆60mg/片，良率98.5%',
+  topcon_cost: '计算TOPCon电池片(182mm)单位成本，硅片价格1.08元/片，正银浆100mg/片，背银浆40mg/片，良率96%',
+  hjt_cost: '计算HJT电池片(210mm)单位成本，硅片价格1.40元/片，低温银浆180mg/片，靶材成本0.04元/W，良率94%',
+  bc_cost: '计算BC电池片(182mm)单位成本，硅片价格1.08元/片，BC专用银浆85mg/片，无背银浆，良率95%',
+  ibc_cost: '计算IBC电池片(210mm)单位成本，硅片价格1.40元/片，IBC专用银浆80mg/片，无背银浆，良率94%，效率27%',
+  module_182: '分析182组件成本，电池片成本0.31元/W，功率550W，玻璃3.2mm，EVA胶膜',
+  module_210: '分析210组件成本，电池片成本0.42元/W，功率660W，玻璃2.0mm，POE胶膜',
+  variance_analysis: '分析本月成本涨价原因，标准成本0.35元/W，实际成本0.38元/W，产量1000MW',
+  wafer_impact: '如果M10硅片价格从1.08元上涨到1.35元，对PERC电池片成本的影响有多大？',
+  silver_impact: '分析银浆价格波动对TOPCon电池片成本的影响，当前银浆价格7850元/kg'
+};
+
+// 加载模板
+function loadTemplate(templateKey) {
+  const input = document.getElementById('costInput');
+  if (input && templates[templateKey]) {
+    input.value = templates[templateKey];
+    input.focus();
+    showToast('模板已加载', 'success');
+    
+    // 自动选择对应的技术路线
+    const cellTypeSelect = document.getElementById('cellType');
+    if (cellTypeSelect) {
+      if (templateKey.includes('perc')) cellTypeSelect.value = 'PERC';
+      else if (templateKey.includes('topcon')) cellTypeSelect.value = 'TOPCon';
+      else if (templateKey.includes('hjt')) cellTypeSelect.value = 'HJT';
+      else if (templateKey.includes('ibc')) cellTypeSelect.value = 'IBC';
+      else if (templateKey.includes('bc')) cellTypeSelect.value = 'BC';
+    }
+  }
 }
 
 // 显示提示

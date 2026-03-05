@@ -142,6 +142,10 @@ layout: false
               <span class="template-icon">⚫</span>
               <span class="template-text">BC电池片成本核算</span>
             </button>
+            <button class="template-btn" onclick="loadTemplate('ibc_cost')">
+              <span class="template-icon">🔘</span>
+              <span class="template-text">IBC电池片成本核算</span>
+            </button>
             <button class="template-btn" onclick="loadTemplate('module_182')">
               <span class="template-icon">📦</span>
               <span class="template-text">182组件成本分析</span>
@@ -199,8 +203,11 @@ layout: false
               <div class="option-group">
                 <label>技术路线:</label>
                 <select id="cellType">
-                  <option value="PERC">PERC</option>
-                  <option value="TOPCon">TOPCon</option>
+                  <option value="PERC">PERC (钝化发射极)</option>
+                  <option value="TOPCon">TOPCon (隧穿氧化层)</option>
+                  <option value="HJT">HJT (异质结)</option>
+                  <option value="BC">BC (背接触)</option>
+                  <option value="IBC">IBC (叉指背接触)</option>
                   <option value="HJT">HJT</option>
                 </select>
               </div>
@@ -369,6 +376,9 @@ layout: false
                   <option value="PERC-210">PERC 210mm</option>
                   <option value="TOPCon-182">TOPCon 182mm</option>
                   <option value="TOPCon-210">TOPCon 210mm</option>
+                  <option value="HJT-210">HJT 210mm</option>
+                  <option value="BC-182">BC 182mm</option>
+                  <option value="IBC-210">IBC 210mm</option>
                   <option value="HJT-210">HJT 210mm</option>
                 </select>
               </div>
