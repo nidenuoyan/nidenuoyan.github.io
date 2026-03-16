@@ -1,0 +1,541 @@
+---
+title: 成本智能分析助手 - AI 版
+date: 2026-03-06 11:00:00
+layout: false
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>成本智能分析助手 - DeepSeek 版 | zoengkei_blog</title>
+  <meta name="description" content="基于 DeepSeek 大模型的成本分析工具，输入需求后由 AI 自动计算、分析和生成报告">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <link rel="stylesheet" href="/factor-generator/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr/npm/marked/marked.min.js"></script>
+  <style>
+    /* 博客头部导航样式 */
+    .blog-nav {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    .blog-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .blog-nav-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .blog-nav-links {
+      display: flex;
+      gap: 24px;
+    }
+    .blog-nav-links a {
+      text-decoration: none;
+      color: #64748b;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+    .blog-nav-links a:hover {
+      color: #2563eb;
+    }
+    /* 为主内容添加顶部间距 */
+    .cost-assistant-container {
+      padding-top: 60px;
+    }
+    /* AI 配置面板 */
+    .ai-config-panel {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .ai-config-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .ai-config-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ai-config-status {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.2);
+    }
+    .ai-config-status.ready {
+      background: rgba(16, 185, 129, 0.3);
+    }
+    .ai-config-input {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .ai-config-input input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 13px;
+    }
+    .ai-config-input input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+    .ai-config-input button {
+      padding: 10px 20px;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .ai-config-input button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .ai-model-select {
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .ai-model-select option {
+      color: #333;
+    }
+    /* AI 结果样式 */
+    .ai-result-content {
+      line-height: 1.8;
+    }
+    .ai-result-content h1,
+    .ai-result-content h2,
+    .ai-result-content h3 {
+      color: var(--text);
+      margin: 20px 0 12px;
+    }
+    .ai-result-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    .ai-result-content th,
+    .ai-result-content td {
+      padding: 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    .ai-result-content th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .ai-result-content code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    .ai-result-content pre {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .ai-result-content blockquote {
+      border-left: 4px solid var(--primary);
+      padding-left: 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+    }
+    .thinking-process {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .thinking-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0369a1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .thinking-content {
+      font-size: 13px;
+      color: #0c4a6e;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <!-- 博客导航栏 -->
+  <nav class="blog-nav">
+    <a href="/" class="blog-nav-brand">
+      <img src="/img/xiaoxin.png" alt="avatar">
+      <span>zoengkei_blog</span>
+    </a>
+    <div class="blog-nav-links">
+      <a href="/">首页</a>
+      <a href="/portfolio/">项目作品</a>
+      <a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+      <a href="/archives/">归档</a>
+      <a href="/about/">关于</a>
+    </div>
+  </nav>
+
+  <!-- 成本分析应用 -->
+  <div class="cost-assistant-container">
+    <!-- 顶部导航 -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🐋</div>
+        <div class="brand-text">
+          <div class="brand-title">成本智能分析助手</div>
+          <div class="brand-subtitle">Powered by DeepSeek</div>
+        </div>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="cost-calc">💰 成本核算</button>
+        <button class="nav-tab" data-tab="variance">📊 差异分析</button>
+        <button class="nav-tab" data-tab="sensitivity">📈 敏感性分析</button>
+        <button class="nav-tab" data-tab="compare">⚖️ 成本对比</button>
+        <button class="nav-tab" data-tab="history">📝 历史记录</button>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      <!-- 左侧工具栏 -->
+      <aside class="sidebar">
+        <!-- AI 服务状态面板 -->
+        <div class="ai-config-panel">
+          <div class="ai-config-header">
+            <div class="ai-config-title">
+              <span>🤖</span>
+              <span>AI 服务状态</span>
+            </div>
+            <div class="ai-config-status ready" id="aiStatus">运行中</div>
+          </div>
+          <div class="ai-info">
+            <div class="ai-info-item">
+              <span class="ai-info-label">模型:</span>
+              <span class="ai-info-value">DeepSeek-R1 (推理模型)</span>
+            </div>
+            <div class="ai-info-item">
+              <span class="ai-info-label">后端:</span>
+              <span class="ai-info-value">Nginx 反向代理 (/api/)</span>
+            </div>
+            <div class="ai-info-item">
+              <span class="ai-info-label">特性:</span>
+              <span class="ai-info-value">显示思考过程 + 最终答案</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">📋 光伏成本分析模板</h3>
+          <div class="template-list">
+            <button class="template-btn" onclick="loadTemplate('perc_182')">
+              <span class="template-icon">🔋</span>
+              <span class="template-text">PERC 182电池片成本</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('topcon_182')">
+              <span class="template-icon">⚡</span>
+              <span class="template-text">TOPCon 182电池片成本</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('hjt_210')">
+              <span class="template-icon">🚀</span>
+              <span class="template-text">HJT 210电池片成本</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('module_182')">
+              <span class="template-icon">📦</span>
+              <span class="template-text">182组件成本分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('module_210')">
+              <span class="template-icon">📦</span>
+              <span class="template-text">210组件成本分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('wafer_impact')">
+              <span class="template-icon">💎</span>
+              <span class="template-text">硅片涨价影响分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('silver_impact')">
+              <span class="template-icon">🥈</span>
+              <span class="template-text">银浆价格波动影响</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('tech_compare')">
+              <span class="template-icon">⚖️</span>
+              <span class="template-text">技术路线成本对比</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('variance_analysis')">
+              <span class="template-icon">📊</span>
+              <span class="template-text">生产成本差异分析</span>
+            </button>
+            <button class="template-btn" onclick="loadTemplate('break_even')">
+              <span class="template-icon">📈</span>
+              <span class="template-text">产能盈亏平衡分析</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">💡 使用提示</h3>
+          <div class="tips-list">
+            <div class="tip-item">• 输入越详细，AI 分析越精准</div>
+            <div class="tip-item">• 支持自然语言描述成本结构</div>
+            <div class="tip-item">• AI 会自动计算并给出分析建议</div>
+            <div class="tip-item">• AI 分析由本地后端代理处理</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 主内容区 -->
+      <section class="content-area">
+        <!-- 成本核算面板 -->
+        <div class="tab-panel active" id="cost-calc-panel">
+          <div class="input-section">
+            <h2 class="section-title">📝 输入成本分析需求</h2>
+            <div class="intro-text">
+              请详细描述您的成本分析需求，包括：产品信息、材料清单、数量、单价等。AI 将自动计算并生成分析报告。
+            </div>
+            <textarea 
+              id="costInput" 
+              class="input-textarea" 
+              placeholder="例如：&#10;分析生产 1000 台智能手机的成本&#10;- 屏幕：1000 片，单价 80 元/片&#10;- 芯片：1000 颗，单价 150 元/颗&#10;- 电池：1000 块，单价 35 元/块&#10;- 外壳：1000 套，单价 20 元/套&#10;- 人工成本：5 人 × 8 小时 × 50 元/小时&#10;- 制造费用：设备折旧 2000 元，水电费 500 元&#10;&#10;请计算：&#10;1. 单位产品成本&#10;2. 总成本&#10;3. 各成本项目占比&#10;4. 降低成本的建议"
+            ></textarea>
+            
+            <div class="input-options">
+              <div class="option-group">
+                <label>分析深度:</label>
+                <select id="analysisDepth">
+                  <option value="simple">简要分析</option>
+                  <option value="standard" selected>标准分析</option>
+                  <option value="detailed">详细分析</option>
+                </select>
+              </div>
+              <div class="option-group">
+                <label>输出格式:</label>
+                <select id="outputFormat">
+                  <option value="table" selected>表格 + 文字</option>
+                  <option value="chart">图表 + 表格</option>
+                  <option value="report">完整报告</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button id="calcBtn" class="btn btn-primary">
+                <span class="btn-icon">🚀</span> AI 分析计算
+              </button>
+              <button id="clearBtn" class="btn btn-secondary">
+                <span class="btn-icon">🗑️</span> 清空
+              </button>
+              <button id="copyBtn" class="btn btn-secondary">
+                <span class="btn-icon">📋</span> 复制结果
+              </button>
+            </div>
+          </div>
+
+          <div class="result-section" id="costResultSection" style="display: none;">
+            <div class="result-header">
+              <h2 class="section-title">📊 AI 分析结果</h2>
+              <div class="result-actions">
+                <button class="btn btn-sm btn-secondary" onclick="exportResult('markdown')">📝 Markdown</button>
+                <button class="btn btn-sm btn-secondary" onclick="exportResult('txt')">📄 文本</button>
+              </div>
+            </div>
+            <div id="thinkingSection" class="thinking-process" style="display: none;">
+              <div class="thinking-title">🧠 AI 思考过程</div>
+              <div class="thinking-content" id="thinkingContent"></div>
+            </div>
+            <div id="costResultContent" class="ai-result-content"></div>
+          </div>
+        </div>
+
+        <!-- 差异分析面板 -->
+        <div class="tab-panel" id="variance-panel">
+          <div class="input-section">
+            <h2 class="section-title">📊 成本差异分析</h2>
+            <div class="intro-text">
+              输入标准成本和实际成本数据，AI 将分析差异原因、计算影响金额并给出改进建议。
+            </div>
+            <textarea 
+              id="varianceInput" 
+              class="input-textarea" 
+              placeholder="例如：&#10;分析本月产品 A 的成本差异&#10;&#10;【标准成本】(预算)&#10;- 直接材料：100 元/件 × 1000 件 = 100,000 元&#10;- 直接人工：20 元/小时 × 2 小时/件 × 1000 件 = 40,000 元&#10;- 制造费用：15 元/小时 × 2 小时/件 × 1000 件 = 30,000 元&#10;- 标准总成本：170,000 元&#10;&#10;【实际成本】&#10;- 直接材料：实际采购 105 元/件，实际用量 1020 件，共 107,100 元&#10;- 直接人工：实际工资 22 元/小时，实际工时 2100 小时，共 46,200 元&#10;- 制造费用：实际 16 元/小时 × 2100 小时 = 33,600 元&#10;- 实际总成本：186,900 元&#10;&#10;请分析：&#10;1. 材料价格差异和用量差异&#10;2. 人工工资率差异和效率差异&#10;3. 制造费用差异&#10;4. 总体差异原因和改进建议"
+            ></textarea>
+            <div class="action-buttons">
+              <button id="varianceBtn" class="btn btn-primary">
+                <span class="btn-icon">🔍</span> AI 差异分析
+              </button>
+              <button class="btn btn-secondary" onclick="loadVarianceExample()">
+                <span class="btn-icon">📋</span> 加载示例
+              </button>
+            </div>
+          </div>
+
+          <div class="result-section" id="varianceResultSection" style="display: none;">
+            <div class="result-header">
+              <h2 class="section-title">📊 差异分析结果</h2>
+              <div class="result-actions">
+                <button class="btn btn-sm btn-secondary" onclick="exportVariance('markdown')">📝 Markdown</button>
+              </div>
+            </div>
+            <div id="varianceThinkingSection" class="thinking-process" style="display: none;">
+              <div class="thinking-title">🧠 AI 思考过程</div>
+              <div class="thinking-content" id="varianceThinkingContent"></div>
+            </div>
+            <div id="varianceResultContent" class="ai-result-content"></div>
+          </div>
+        </div>
+
+        <!-- 敏感性分析面板 -->
+        <div class="tab-panel" id="sensitivity-panel">
+          <div class="input-section">
+            <h2 class="section-title">📈 价格敏感性分析</h2>
+            <div class="intro-text">
+              分析原材料价格波动对成本的影响，AI 将计算敏感度系数并给出风险提示。
+            </div>
+            <textarea 
+              id="sensitivityInput" 
+              class="input-textarea" 
+              placeholder="例如：&#10;分析某产品成本对主要原材料价格变动的敏感性&#10;&#10;【当前成本结构】&#10;- 原材料 A：占成本 40%，当前价格 100 元/kg&#10;- 原材料 B：占成本 30%，当前价格 50 元/kg&#n- 原材料 C：占成本 20%，当前价格 80 元/kg&#10;- 其他成本：占成本 10%&#10;&#10;【分析要求】&#10;1. 计算各原材料价格上涨 10%、20%、30% 时对总成本的影响&#10;2. 计算敏感度系数&#10;3. 分析价格下跌时的成本变化&#10;4. 给出采购策略建议和风险控制措施"
+            ></textarea>
+            <div class="action-buttons">
+              <button id="sensitivityBtn" class="btn btn-primary">
+                <span class="btn-icon">📊</span> AI 敏感性分析
+              </button>
+              <button class="btn btn-secondary" onclick="loadSensitivityExample()">
+                <span class="btn-icon">📋</span> 加载示例
+              </button>
+            </div>
+          </div>
+
+          <div class="result-section" id="sensitivityResultSection" style="display: none;">
+            <div class="result-header">
+              <h2 class="section-title">📈 敏感性分析结果</h2>
+            </div>
+            <div id="sensitivityThinkingSection" class="thinking-process" style="display: none;">
+              <div class="thinking-title">🧠 AI 思考过程</div>
+              <div class="thinking-content" id="sensitivityThinkingContent"></div>
+            </div>
+            <div id="sensitivityResultContent" class="ai-result-content"></div>
+          </div>
+        </div>
+
+        <!-- 成本对比面板 -->
+        <div class="tab-panel" id="compare-panel">
+          <div class="input-section">
+            <h2 class="section-title">⚖️ 多方案成本对比</h2>
+            <div class="intro-text">
+              对比不同技术路线、供应商或生产方案的成本差异，AI 将给出最优方案建议。
+            </div>
+            <textarea 
+              id="compareInput" 
+              class="input-textarea" 
+              placeholder="例如：&#10;对比两种生产方案的成本&#10;&#10;【方案 A：自主生产】&#10;- 设备投资：500 万元，使用年限 10 年&#10;- 年产能：10,000 件&#10;- 单位变动成本：材料 80 元 + 人工 30 元 + 制造费用 20 元 = 130 元/件&#10;- 年固定成本：折旧 50 万 + 管理费用 30 万 = 80 万元&#10;&#10;【方案 B：外包生产】&#10;- 无需设备投资&#10;- 采购单价：180 元/件&#10;- 预计年采购量：10,000 件&#10;&#10;【分析要求】&#10;1. 计算两种方案在年产量 10,000 件时的总成本&#10;2. 计算成本无差别点的产量&#10;3. 分析不同产量下的最优方案&#10;4. 考虑质量、交期、技术保密等因素给出综合建议"
+            ></textarea>
+            <div class="action-buttons">
+              <button id="compareBtn" class="btn btn-primary">
+                <span class="btn-icon">⚖️</span> AI 对比分析
+              </button>
+              <button class="btn btn-secondary" onclick="loadCompareExample()">
+                <span class="btn-icon">📋</span> 加载示例
+              </button>
+            </div>
+          </div>
+
+          <div class="result-section" id="compareResultSection" style="display: none;">
+            <div class="result-header">
+              <h2 class="section-title">⚖️ 对比分析结果</h2>
+            </div>
+            <div id="compareThinkingSection" class="thinking-process" style="display: none;">
+              <div class="thinking-title">🧠 AI 思考过程</div>
+              <div class="thinking-content" id="compareThinkingContent"></div>
+            </div>
+            <div id="compareResultContent" class="ai-result-content"></div>
+          </div>
+        </div>
+
+        <!-- 历史记录面板 -->
+        <div class="tab-panel" id="history-panel">
+          <div class="history-header">
+            <h2 class="section-title">📝 分析历史</h2>
+            <div class="history-actions">
+              <button class="btn btn-sm btn-secondary" onclick="clearAllHistory()">
+                <span class="btn-icon">🗑️</span> 清空历史
+              </button>
+            </div>
+          </div>
+          <div id="historyList" class="history-list">
+            <p class="empty-tip">暂无历史记录</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 加载遮罩 -->
+    <div id="loadingMask" class="loading-mask" style="display: none;">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p id="loadingText">AI 正在思考中...</p>
+        <small style="color: #999; margin-top: 8px;">DeepSeek-R1 正在推理，可能需要 20-60 秒</small>
+      </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
+    <!-- 底部说明 -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p>
+          <strong>成本智能分析助手</strong> - 基于 DeepSeek-R1 大模型
+        </p>
+        <p class="footer-links">
+          <a href="https://zoengsang.cloud" target="_blank">技术博客</a> |
+          <a href="https://github.com/nidenuoyan" target="_blank">GitHub</a> |
+          <a href="https://platform.deepseek.com" target="_blank">DeepSeek 开放平台</a> |
+          <span>后端代理模式 - API Key 安全存储</span>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/factor-generator/app.js"></script>
+</body>
+</html>

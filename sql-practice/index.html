@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySQL交互式SQL练习与AB测试分析 | zoengkei_blog</title>
+  <meta name="description" content="在线执行SQL查询，进行AB测试效果分析。包含留存率、RFM、LTV等经典数据分析场景。">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <style>
+    /* 页面基础样式 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1e293b; line-height: 1.6; background: #f8fafc; }
+    
+    /* 博客导航栏 */
+    .blog-nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+    .blog-nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1e293b; font-weight: 600; font-size: 18px; }
+    .blog-nav-brand img { width: 40px; height: 40px; border-radius: 50%; }
+    .blog-nav-links { display: flex; gap: 24px; }
+    .blog-nav-links a { text-decoration: none; color: #64748b; font-size: 14px; transition: color 0.3s; }
+    .blog-nav-links a:hover { color: #2563eb; }
+    
+    /* 主内容区域 */
+    .sql-practice-container { padding-top: 60px; }
+    
+    /* Hero 头部区域 */
+    .sql-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 30px; text-align: center; position: relative; overflow: hidden; }
+    .sql-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); opacity: 0.3; }
+    .sql-hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+    .sql-hero-icon { font-size: 48px; margin-bottom: 15px; }
+    .sql-hero h1 { font-size: 2.2rem; font-weight: 700; margin: 0 0 12px 0; color: white; }
+    .sql-hero-subtitle { font-size: 1.1rem; opacity: 0.9; margin-bottom: 25px; }
+    .sql-hero-badges { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .sql-hero-badge { background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+    
+    /* 功能特性卡片区域 */
+    .sql-features-section { padding: 40px 30px; background: #f8fafc; }
+    .sql-features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+    .sql-feature-card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid #e2e8f0; }
+    .sql-feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(102, 126, 234, 0.25); border-color: #c7d2fe; }
+    .sql-feature-icon { font-size: 36px; margin-bottom: 16px; display: block; }
+    .sql-feature-card h3 { font-size: 1.15rem; font-weight: 600; margin: 0 0 10px 0; color: #1e293b; }
+    .sql-feature-card p { font-size: 0.95rem; color: #64748b; margin: 0; line-height: 1.5; }
+    
+    /* 数据库状态面板 */
+    .sql-db-panel { background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); color: white; padding: 20px 30px; margin: 30px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
+    .sql-db-info { display: flex; align-items: center; gap: 12px; }
+    .sql-db-status { width: 10px; height: 10px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .sql-db-title { font-weight: 600; font-size: 1rem; }
+    .sql-db-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .sql-db-stat { text-align: center; }
+    .sql-db-stat-value { font-size: 1.4rem; font-weight: 700; display: block; }
+    .sql-db-stat-label { font-size: 0.8rem; opacity: 0.8; }
+    
+    /* 主应用区域 */
+    .sql-app-section { padding: 0 30px 40px; }
+    .sql-app-wrapper { max-width: 1400px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #e2e8f0; }
+    
+    /* 使用提示区域 */
+    .sql-tips-section { padding: 30px; background: #f0f9ff; border-top: 1px solid #e0f2fe; }
+    .sql-tips-content { max-width: 1200px; margin: 0 auto; }
+    .sql-tips-title { font-size: 1.1rem; font-weight: 600; color: #0369a1; margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; }
+    .sql-tips-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+    .sql-tips-list li { padding: 8px 0; color: #0c4a6e; font-size: 0.95rem; display: flex; align-items: flex-start; gap: 8px; }
+    .sql-tips-list li::before { content: '✓'; color: #0891b2; font-weight: bold; flex-shrink: 0; }
+    
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+      .sql-hero { padding: 40px 20px; }
+      .sql-hero h1 { font-size: 1.6rem; }
+      .sql-db-panel { flex-direction: column; text-align: center; margin: 20px; padding: 20px; }
+      .sql-features-section { padding: 30px 20px; }
+      .sql-app-section { padding: 0 20px 30px; }
+    }
+    
+    /* iframe 嵌入区域 */
+    .sql-iframe-container { width: 100%; height: 1200px; border: none; display: block; }
+    @media (max-width: 768px) { .sql-iframe-container { height: 1500px; } }
+  </style>
+</head>
+<body>
+  <!-- 博客导航栏 -->
+  <nav class="blog-nav">
+    <a href="/" class="blog-nav-brand">
+      <img src="/img/xiaoxin.png" alt="avatar">
+      <span>zoengkei_blog</span>
+    </a>
+    <div class="blog-nav-links">
+      <a href="/">首页</a>
+      <a href="/portfolio/">项目作品</a>
+      <a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+      <a href="/archives/">归档</a>
+      <a href="/about/">关于</a>
+    </div>
+  </nav>
+
+  <div class="sql-practice-container">
+    <!-- Hero 头部区域 -->
+    <section class="sql-hero">
+      <div class="sql-hero-content">
+        <div class="sql-hero-icon">🎯</div>
+        <h1>MySQL交互式SQL练习与AB测试分析</h1>
+        <p class="sql-hero-subtitle">在线执行SQL查询 · 数据分析 · AB测试 · 统计显著性检验</p>
+        <div class="sql-hero-badges">
+          <span class="sql-hero-badge">📚 10+ 示例查询</span>
+          <span class="sql-hero-badge">🔒 安全执行环境</span>
+          <span class="sql-hero-badge">📊 统计检验</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 功能特性卡片 -->
+    <section class="sql-features-section">
+      <div class="sql-features-grid">
+        <div class="sql-feature-card">
+          <span class="sql-feature-icon">📝</span>
+          <h3>SQL执行器</h3>
+          <p>在线执行SELECT查询，支持代码高亮和结果表格展示，内置语法安全检查</p>
+        </div>
+        <div class="sql-feature-card">
+          <span class="sql-feature-icon">📊</span>
+          <h3>AB测试分析</h3>
+          <p>自动计算统计显著性，对比对照组与实验组效果，支持转化率、ARPU等指标</p>
+        </div>
+        <div class="sql-feature-card">
+          <span class="sql-feature-icon">📚</span>
+          <h3>示例查询</h3>
+          <p>留存率、RFM、LTV、漏斗分析等经典数据分析SQL案例一键执行</p>
+        </div>
+        <div class="sql-feature-card">
+          <span class="sql-feature-icon">🔒</span>
+          <h3>安全执行</h3>
+          <p>仅允许SELECT查询，只读数据库保护数据安全，自动拦截危险操作</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Olist真实数据通知 -->
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px 30px; margin: 30px 30px 0; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 24px;">📦</span>
+        <div>
+          <div style="font-weight: 600; font-size: 1rem;">新增：Olist巴西电商真实数据集</div>
+          <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 4px;">包含99k+订单、RFM分析、Cohort留存等经典SQL练习场景</div>
+        </div>
+      </div>
+      <a href="/2026/03/15/Olist-电商数据分析-RFM与Cohort实战/" style="background: white; color: #d97706; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; white-space: nowrap;">查看导入指南 →</a>
+    </div>
+
+    <!-- 数据库状态面板 -->
+    <div class="sql-db-panel">
+      <div class="sql-db-info">
+        <div class="sql-db-status"></div>
+        <span class="sql-db-title">🗄️ sql_practice 数据库状态正常</span>
+      </div>
+      <div class="sql-db-stats">
+        <div class="sql-db-stat"><span class="sql-db-stat-value">1,500</span><span class="sql-db-stat-label">用户</span></div>
+        <div class="sql-db-stat"><span class="sql-db-stat-value">15,000</span><span class="sql-db-stat-label">订单</span></div>
+        <div class="sql-db-stat"><span class="sql-db-stat-value">60,000</span><span class="sql-db-stat-label">行为记录</span></div>
+        <div class="sql-db-stat"><span class="sql-db-stat-value">3</span><span class="sql-db-stat-label">AB测试</span></div>
+      </div>
+    </div>
+
+    <!-- 主应用区域 -->
+    <section class="sql-app-section">
+      <div class="sql-app-wrapper">
+        <iframe src="/sql-practice/app/?nocache=1" class="sql-iframe-container" allowfullscreen></iframe>
+      </div>
+    </section>
+
+    <!-- 使用提示 -->
+    <section class="sql-tips-section">
+      <div class="sql-tips-content">
+        <h3 class="sql-tips-title">💡 使用提示</h3>
+        <ul class="sql-tips-list">
+          <li>点击左侧「示例查询」可快速学习经典SQL，如留存率分析、RFM用户分层等</li>
+          <li>AB测试分析支持转化率、ARPU（人均消费）、复购率三种核心指标</li>
+          <li>P值 &lt; 0.05 表示统计显著，实验结果可信度高，可以放心采纳</li>
+          <li>所有查询在安全的只读环境中执行，不会修改任何数据</li>
+        </ul>
+      </div>
+    </section>
+    
+    <!-- Olist数据练习指南 -->
+    <section style="padding: 30px; background: #f0fdf4; border-top: 1px solid #bbf7d0;">
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <h3 style="font-size: 1.1rem; font-weight: 600; color: #166534; margin: 0 0 15px 0;">📦 Olist电商数据SQL练习（推荐）</h3>
+        <p style="color: #166534; margin-bottom: 15px;">基于巴西电商平台Olist的真实数据（99k+订单），提供从基础查询到高级分析的完整SQL练习：</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+          <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #22c55e;">
+            <strong style="color: #166534;">Level 1 - 基础查询</strong>
+            <p style="font-size: 0.9rem; color: #555; margin-top: 5px;">订单状态分布、客户地理分布、支付方式分析</p>
+          </div>
+          <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #1e40af;">Level 2 - 中级查询</strong>
+            <p style="font-size: 0.9rem; color: #555; margin-top: 5px;">月度销售趋势、客户复购分析、RFM客户分层</p>
+          </div>
+          <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #a855f7;">
+            <strong style="color: #6b21a8;">Level 3 - 高级查询</strong>
+            <p style="font-size: 0.9rem; color: #555; margin-top: 5px;">Cohort留存分析、商品品类分析、配送时效分析</p>
+          </div>
+        </div>
+        <div style="margin-top: 20px;">
+          <a href="/2026/03/15/Olist-电商数据分析-RFM与Cohort实战/" style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; margin-right: 10px;">查看SQL练习题 →</a>
+          <a href="https://github.com/yourusername/olist-ecommerce-analysis/tree/main/sql" target="_blank" style="display: inline-block; background: #f3f4f6; color: #374151; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500;">下载导入脚本</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

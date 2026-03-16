@@ -1,0 +1,924 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析 | zoengkei_blog</title><meta name="author" content="zoengkei"><meta name="copyright" content="zoengkei"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基于Olist巴西电商10万+订单数据，系统分析6个月留存率仅0.3%、次月留存率5.5%的根因，从数据异常定位到平台模式结构性缺陷，设计短中长期可落地方案">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析">
+<meta property="og:url" content="https://zoengsang.cloud/2026/03/15/olist-ecommerce-analysis-complete-guide/index.html">
+<meta property="og:site_name" content="zoengkei_blog">
+<meta property="og:description" content="基于Olist巴西电商10万+订单数据，系统分析6个月留存率仅0.3%、次月留存率5.5%的根因，从数据异常定位到平台模式结构性缺陷，设计短中长期可落地方案">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zoengsang.cloud/img/xiaoxin.png">
+<meta property="article:published_time" content="2026-03-15T15:30:00.000Z">
+<meta property="article:modified_time" content="2026-03-16T09:15:41.049Z">
+<meta property="article:author" content="zoengkei">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="数据分析">
+<meta property="article:tag" content="RFM模型">
+<meta property="article:tag" content="Cohort分析">
+<meta property="article:tag" content="用户留存">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zoengsang.cloud/img/xiaoxin.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析",
+  "url": "https://zoengsang.cloud/2026/03/15/olist-ecommerce-analysis-complete-guide/",
+  "image": "https://zoengsang.cloud/img/xiaoxin.png",
+  "datePublished": "2026-03-15T15:30:00.000Z",
+  "dateModified": "2026-03-16T09:15:41.049Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zoengkei",
+      "url": "https://zoengsang.cloud"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.ico"><link rel="canonical" href="https://zoengsang.cloud/2026/03/15/olist-ecommerce-analysis-complete-guide/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.2"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":5,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":600,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/xiaoxin.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/ loading='lazy'></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/portfolio/"><i class="fa-fw fas fa-briefcase"></i><span> 项目作品</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/"><i class="fa-fw fas fa-chart-line"></i><span> 数据分析</span></a></div><div class="menus_item"><a class="site-page" href="/factor-generator/"><i class="fa-fw fas fa-solar-panel"></i><span> 光伏成本</span></a></div><div class="menus_item"><a class="site-page" href="/sql-practice/"><i class="fa-fw fas fa-database"></i><span> SQL练习</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-circle"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/luoqixi.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">zoengkei_blog</span></a><a class="nav-page-title" href="/"><span class="site-name">Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/portfolio/"><i class="fa-fw fas fa-briefcase"></i><span> 项目作品</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/"><i class="fa-fw fas fa-chart-line"></i><span> 数据分析</span></a></div><div class="menus_item"><a class="site-page" href="/factor-generator/"><i class="fa-fw fas fa-solar-panel"></i><span> 光伏成本</span></a></div><div class="menus_item"><a class="site-page" href="/sql-practice/"><i class="fa-fw fas fa-database"></i><span> SQL练习</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-circle"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-15T15:30:00.000Z" title="发表于 2026-03-15 23:30:00">2026-03-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-16T09:15:41.049Z" title="更新于 2026-03-16 17:15:41">2026-03-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E9%A1%B9%E7%9B%AE/">数据分析项目</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">7.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>33分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><strong>核心问题</strong>：Olist作为巴西最大第三方电商平台，面临严重留存危机——97%用户仅完成一次购买，次月留存率仅5.5%，6个月留存率仅0.3%，远低于行业平均水平。</p>
+<p>本文从”留存率为何偏低”核心问题出发，逐层拆解为可验证的子假设，运用SQL+Python全链路分析，识别5大根因，设计可量化的运营干预方案。</p>
+</blockquote>
+<p><img src="/images/olist/dashboard_overview.png" alt="Dashboard Overview" loading='lazy'></p>
+<span id="more"></span>
+
+<hr>
+<h2 id="一、问题定义与分析框架"><a href="#一、问题定义与分析框架" class="headerlink" title="一、问题定义与分析框架"></a>一、问题定义与分析框架</h2><h3 id="1-1-核心问题：留存率危机的严峻现实"><a href="#1-1-核心问题：留存率危机的严峻现实" class="headerlink" title="1.1 核心问题：留存率危机的严峻现实"></a>1.1 核心问题：留存率危机的严峻现实</h3><p>Olist是巴西最大的第三方电商平台，连接4.5万+商家与数百万消费者。平台公开了2017-2018年10万+订单数据集，但面临用户留存危机：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>Olist实际值</th>
+<th>行业基准</th>
+<th>差距</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>6个月留存率</td>
+<td><strong>0.27%</strong></td>
+<td>8.7%（巴西平均）</td>
+<td>-97%</td>
+</tr>
+<tr>
+<td>次月留存率</td>
+<td><strong>5.45%</strong></td>
+<td>20-30%（健康水平）</td>
+<td>-78%</td>
+</tr>
+<tr>
+<td>复购率</td>
+<td><strong>3%</strong></td>
+<td>15-20%（电商平均）</td>
+<td>-80%</td>
+</tr>
+</tbody></table>
+<p><strong>关键发现</strong>：<strong>97%的用户仅完成一次购买</strong>，平台沦为”一次性获客工具”。</p>
+<p><img src="/images/olist/customer_funnel.png" alt="Customer Funnel" loading='lazy'></p>
+<p><em>客户旅程漏斗：从访问到复购的转化率极低，首单到复购仅6.4%</em></p>
+<h3 id="1-2-假设树构建：留存率的系统性拆解"><a href="#1-2-假设树构建：留存率的系统性拆解" class="headerlink" title="1.2 假设树构建：留存率的系统性拆解"></a>1.2 假设树构建：留存率的系统性拆解</h3><p>将”留存率低”这一结果指标，分解为可独立验证的过程指标组合：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">留存率（次月仅5.5%，6个月仅0.3%）严重偏低</span><br><span class="line">├── 假设1：获客质量问题</span><br><span class="line">│   ├── 渠道结构：自然流量 vs 付费流量占比</span><br><span class="line">│   ├── 用户画像：价格敏感型用户占比过高</span><br><span class="line">│   └── 首次体验：onboarding流程缺陷</span><br><span class="line">├── 假设2：产品体验缺陷</span><br><span class="line">│   ├── 物流体验：配送时长、准时率</span><br><span class="line">│   ├── 商品体验：质量、描述准确度</span><br><span class="line">│   └── 服务体验：客服响应、退货流程</span><br><span class="line">├── 假设3：竞争替代效应</span><br><span class="line">│   ├── 竞品对比：Mercado Libre、亚马逊巴西</span><br><span class="line">│   ├── 价格竞争力：跨平台比价行为</span><br><span class="line">│   └── 服务差距：物流、会员体系</span><br><span class="line">├── 假设4：运营体系缺失</span><br><span class="line">│   ├── 会员体系：积分、等级、权益</span><br><span class="line">│   ├── 唤醒机制：沉默用户识别与触达</span><br><span class="line">│   └── 个性化：推荐精准度</span><br><span class="line">└── 假设5：平台模式结构性缺陷</span><br><span class="line">    ├── 商家-用户关系割裂</span><br><span class="line">    ├── 数据掌控权分散</span><br><span class="line">    └── GMV导向思维偏差</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析方法</strong>：对每个假设，设计数据验证方案，运用对照分析、趋势中断检验、统计控制方法提升结论效度。</p>
+<hr>
+<h2 id="二、数据探索与质量验证"><a href="#二、数据探索与质量验证" class="headerlink" title="二、数据探索与质量验证"></a>二、数据探索与质量验证</h2><h3 id="2-1-数据集结构"><a href="#2-1-数据集结构" class="headerlink" title="2.1 数据集结构"></a>2.1 数据集结构</h3><table>
+<thead>
+<tr>
+<th>数据表</th>
+<th>记录数</th>
+<th>核心字段</th>
+<th>业务含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>orders</td>
+<td>99,441</td>
+<td>order_id, customer_id, order_status, timestamps</td>
+<td>订单主表</td>
+</tr>
+<tr>
+<td>order_items</td>
+<td>112,650</td>
+<td>order_id, product_id, price, freight_value</td>
+<td>订单商品明细</td>
+</tr>
+<tr>
+<td>customers</td>
+<td>99,441</td>
+<td>customer_id, customer_unique_id, customer_state</td>
+<td>客户信息</td>
+</tr>
+<tr>
+<td>payments</td>
+<td>103,886</td>
+<td>order_id, payment_type, payment_installments</td>
+<td>支付信息</td>
+</tr>
+<tr>
+<td>reviews</td>
+<td>99,224</td>
+<td>order_id, review_score</td>
+<td>用户评价</td>
+</tr>
+<tr>
+<td>products</td>
+<td>32,951</td>
+<td>product_id, product_category_name</td>
+<td>商品信息</td>
+</tr>
+</tbody></table>
+<p><strong>关键观察</strong>：order_items &gt; orders（112,650 vs 99,441），13.3%的订单包含多个商品。</p>
+<h3 id="2-2-数据质量检验"><a href="#2-2-数据质量检验" class="headerlink" title="2.2 数据质量检验"></a>2.2 数据质量检验</h3><p><strong>代码实现</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta</span><br><span class="line"><span class="keyword">from</span> operator <span class="keyword">import</span> attrgetter</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="comment"># 动态路径获取</span></span><br><span class="line">SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))</span><br><span class="line">PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)</span><br><span class="line">DATA_PATH = os.path.join(PROJECT_ROOT, <span class="string">&#x27;data/&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载数据</span></span><br><span class="line">orders = pd.read_csv(DATA_PATH + <span class="string">&#x27;olist_orders_dataset.csv&#x27;</span>)</span><br><span class="line">order_items = pd.read_csv(DATA_PATH + <span class="string">&#x27;olist_order_items_dataset.csv&#x27;</span>)</span><br><span class="line">customers = pd.read_csv(DATA_PATH + <span class="string">&#x27;olist_customers_dataset.csv&#x27;</span>)</span><br><span class="line">payments = pd.read_csv(DATA_PATH + <span class="string">&#x27;olist_order_payments_dataset.csv&#x27;</span>)</span><br><span class="line">reviews = pd.read_csv(DATA_PATH + <span class="string">&#x27;olist_order_reviews_dataset.csv&#x27;</span>)</span><br><span class="line">products = pd.read_csv(DATA_PATH + <span class="string">&#x27;olist_products_dataset.csv&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据概览</span></span><br><span class="line">datasets = &#123;</span><br><span class="line">    <span class="string">&#x27;orders&#x27;</span>: orders, <span class="string">&#x27;order_items&#x27;</span>: order_items, <span class="string">&#x27;customers&#x27;</span>: customers,</span><br><span class="line">    <span class="string">&#x27;payments&#x27;</span>: payments, <span class="string">&#x27;reviews&#x27;</span>: reviews, <span class="string">&#x27;products&#x27;</span>: products</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> name, df <span class="keyword">in</span> datasets.items():</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>: <span class="subst">&#123;df.shape[<span class="number">0</span>]:,&#125;</span> 行 × <span class="subst">&#123;df.shape[<span class="number">1</span>]&#125;</span> 列&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">orders: 99,441 行 × 8 列</span><br><span class="line">order_items: 112,650 行 × 7 列</span><br><span class="line">customers: 99,441 行 × 5 列</span><br><span class="line">payments: 103,886 行 × 5 列</span><br><span class="line">reviews: 99,224 行 × 7 列</span><br><span class="line">products: 32,951 行 × 9 列</span><br></pre></td></tr></table></figure>
+
+<p><strong>缺失值检验</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">analyze_missing</span>(<span class="params">df, name</span>):</span><br><span class="line">    missing = df.isnull().<span class="built_in">sum</span>()</span><br><span class="line">    missing_pct = (missing / <span class="built_in">len</span>(df) * <span class="number">100</span>).<span class="built_in">round</span>(<span class="number">2</span>)</span><br><span class="line">    missing_df = pd.DataFrame(&#123;</span><br><span class="line">        <span class="string">&#x27;字段&#x27;</span>: missing.index,</span><br><span class="line">        <span class="string">&#x27;缺失数量&#x27;</span>: missing.values,</span><br><span class="line">        <span class="string">&#x27;缺失比例(%)&#x27;</span>: missing_pct.values</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> missing_df[missing_df[<span class="string">&#x27;缺失数量&#x27;</span>] &gt; <span class="number">0</span>].sort_values(<span class="string">&#x27;缺失比例(%)&#x27;</span>, ascending=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># orders表缺失值分析</span></span><br><span class="line">orders_missing = analyze_missing(orders, <span class="string">&#x27;orders&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(orders_missing.to_string(index=<span class="literal">False</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证缺失原因：查看order_delivered_customer_date为空的订单状态</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;\n缺失配送时间的订单状态分布:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(orders[orders[<span class="string">&#x27;order_delivered_customer_date&#x27;</span>].isnull()][<span class="string">&#x27;order_status&#x27;</span>].value_counts())</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">字段                          缺失数量  缺失比例(%)</span><br><span class="line">order_delivered_customer_date    2965       2.98</span><br><span class="line">order_delivered_carrier_date     1783       1.79</span><br><span class="line">order_approved_at                 160       0.16</span><br><span class="line"></span><br><span class="line">缺失配送时间的订单状态分布:</span><br><span class="line">shipped        1107</span><br><span class="line">canceled        619</span><br><span class="line">unavailable     609</span><br><span class="line">invoiced        314</span><br><span class="line">processing      301</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键发现</strong>：</p>
+<ul>
+<li>orders表2,965条配送时间缺失（2.98%），均为未送达订单（shipped&#x2F;canceled等），属业务逻辑正常缺失</li>
+<li>reviews评论缺失88%，属用户行为特征（仅评分不评论），保留空值作为”沉默用户”标识</li>
+</ul>
+<h3 id="2-3-地理分布分析：极度集中的市场结构"><a href="#2-3-地理分布分析：极度集中的市场结构" class="headerlink" title="2.3 地理分布分析：极度集中的市场结构"></a>2.3 地理分布分析：极度集中的市场结构</h3><p><img src="/images/olist/geographic_distribution.png" alt="Geographic Distribution" loading='lazy'></p>
+<p><em>巴西各州客户分布：圣保罗州（SP）独占42%客户（39,156人），前5州贡献77%收入</em></p>
+<p><strong>SQL实现</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    c.customer_state,</span><br><span class="line">    <span class="built_in">COUNT</span>(<span class="keyword">DISTINCT</span> c.customer_unique_id) <span class="keyword">as</span> customer_count,</span><br><span class="line">    <span class="built_in">SUM</span>(p.payment_value) <span class="keyword">as</span> total_revenue,</span><br><span class="line">    <span class="built_in">AVG</span>(DATEDIFF(o.order_delivered_customer_date, o.order_purchase_timestamp)) <span class="keyword">as</span> avg_delivery_days</span><br><span class="line"><span class="keyword">FROM</span> orders o</span><br><span class="line"><span class="keyword">JOIN</span> customers c <span class="keyword">ON</span> o.customer_id <span class="operator">=</span> c.customer_id</span><br><span class="line"><span class="keyword">JOIN</span> payments p <span class="keyword">ON</span> o.order_id <span class="operator">=</span> p.order_id</span><br><span class="line"><span class="keyword">WHERE</span> o.order_status <span class="operator">=</span> <span class="string">&#x27;delivered&#x27;</span></span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> c.customer_state</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> customer_count <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键发现</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>州</th>
+<th>客户数</th>
+<th>占比</th>
+<th>收入占比</th>
+<th>平均配送天数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SP（圣保罗）</td>
+<td>39,156</td>
+<td>42%</td>
+<td>38%</td>
+<td>10.2天</td>
+</tr>
+<tr>
+<td>RJ（里约）</td>
+<td>11,917</td>
+<td>13%</td>
+<td>13%</td>
+<td>12.8天</td>
+</tr>
+<tr>
+<td>MG（米纳斯）</td>
+<td>11,001</td>
+<td>12%</td>
+<td>12%</td>
+<td>13.5天</td>
+</tr>
+<tr>
+<td>其他23州</td>
+<td>29,042</td>
+<td>32%</td>
+<td>37%</td>
+<td>15.8天</td>
+</tr>
+</tbody></table>
+<p><strong>业务洞察</strong>：</p>
+<ul>
+<li><strong>市场集中度极高</strong>：SP州独占42%客户，物流基础设施相对完善</li>
+<li><strong>地理机会与风险并存</strong>：非SP地区客户满意度系统性偏低（配送天数+55%），但渗透率低意味着增长潜力</li>
+<li><strong>州级运营策略差异化</strong>：SP市场深耕客户价值、新兴市场优先解决物流瓶颈</li>
+</ul>
+<p><strong>异常值检验</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 价格异常值检测（IQR方法）</span></span><br><span class="line">price_stats = order_items[<span class="string">&#x27;price&#x27;</span>].describe()</span><br><span class="line">Q1 = price_stats[<span class="string">&#x27;25%&#x27;</span>]</span><br><span class="line">Q3 = price_stats[<span class="string">&#x27;75%&#x27;</span>]</span><br><span class="line">IQR = Q3 - Q1</span><br><span class="line">lower_bound = Q1 - <span class="number">1.5</span> * IQR</span><br><span class="line">upper_bound = Q3 + <span class="number">1.5</span> * IQR</span><br><span class="line"></span><br><span class="line">outliers = order_items[(order_items[<span class="string">&#x27;price&#x27;</span>] &lt; lower_bound) | (order_items[<span class="string">&#x27;price&#x27;</span>] &gt; upper_bound)]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;价格统计: count=<span class="subst">&#123;<span class="built_in">len</span>(order_items)&#125;</span>, mean=$<span class="subst">&#123;order_items[<span class="string">&#x27;price&#x27;</span>].mean():<span class="number">.2</span>f&#125;</span>&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;IQR异常值: <span class="subst">&#123;<span class="built_in">len</span>(outliers):,&#125;</span>个 (<span class="subst">&#123;<span class="built_in">len</span>(outliers)/<span class="built_in">len</span>(order_items)*<span class="number">100</span>:<span class="number">.2</span>f&#125;</span>%)&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;正常范围: [<span class="subst">&#123;lower_bound:<span class="number">.2</span>f&#125;</span>, <span class="subst">&#123;upper_bound:<span class="number">.2</span>f&#125;</span>]&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;最高价格: $<span class="subst">&#123;order_items[<span class="string">&#x27;price&#x27;</span>].<span class="built_in">max</span>():<span class="number">.2</span>f&#125;</span>&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;最低价格: $<span class="subst">&#123;order_items[<span class="string">&#x27;price&#x27;</span>].<span class="built_in">min</span>():<span class="number">.2</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看极端价格</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;\n最高价格Top 3:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(order_items.nlargest(<span class="number">3</span>, <span class="string">&#x27;price&#x27;</span>)[[<span class="string">&#x27;order_id&#x27;</span>, <span class="string">&#x27;price&#x27;</span>, <span class="string">&#x27;freight_value&#x27;</span>]])</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">价格统计: count=112,650, mean=$120.65</span><br><span class="line">IQR异常值: 8,427个 (7.48%)</span><br><span class="line">正常范围: [-102.60, 277.40]</span><br><span class="line">最高价格: $6,735.00</span><br><span class="line">最低价格: $0.85</span><br><span class="line"></span><br><span class="line">最高价格Top 3:</span><br><span class="line">                           order_id   price  freight_value</span><br><span class="line">    0812eb902a67711a1cb742b3cdaa65ae 6735.00         194.31</span><br><span class="line">    fefacc66af859508bf1a7934eab1e97f 6729.00         193.21</span><br><span class="line">    f5136e38d1a14a4dbd87dff67da82701 6499.00         227.66</span><br></pre></td></tr></table></figure>
+
+<p><strong>处理方案</strong>：采用Winsorization（缩尾处理），保留1%-99%分位数，极端值截断而非删除。</p>
+<hr>
+<h2 id="三、假设验证：留存率根因分析"><a href="#三、假设验证：留存率根因分析" class="headerlink" title="三、假设验证：留存率根因分析"></a>三、假设验证：留存率根因分析</h2><h3 id="3-1-假设1验证：获客质量问题"><a href="#3-1-假设1验证：获客质量问题" class="headerlink" title="3.1 假设1验证：获客质量问题"></a>3.1 假设1验证：获客质量问题</h3><p><strong>验证方法</strong>：分析用户首次购买的渠道特征（若数据可用）与后续留存关系。</p>
+<p><strong>数据局限</strong>：Olist数据集未包含获客渠道信息，无法直接验证。但从用户行为数据中间接推断：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析首次购买的时间分布（是否存在促销集中）</span></span><br><span class="line">first_purchase = orders.groupby(<span class="string">&#x27;customer_id&#x27;</span>)[<span class="string">&#x27;order_purchase_timestamp&#x27;</span>].<span class="built_in">min</span>()</span><br><span class="line">first_purchase_month = pd.to_datetime(first_purchase).dt.to_period(<span class="string">&#x27;M&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;首次购买月份分布（Top 10）:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(first_purchase_month.value_counts().head(<span class="number">10</span>))</span><br></pre></td></tr></table></figure>
+
+<p><strong>结论</strong>：获客质量问题无法直接验证，需用户调研补充。但从复购率极低（4%）推断，获客策略可能过度依赖价格促销，吸引价格敏感型非忠诚用户。</p>
+<h3 id="3-2-假设2验证：产品体验缺陷——物流是核心瓶颈"><a href="#3-2-假设2验证：产品体验缺陷——物流是核心瓶颈" class="headerlink" title="3.2 假设2验证：产品体验缺陷——物流是核心瓶颈"></a>3.2 假设2验证：产品体验缺陷——物流是核心瓶颈</h3><p><strong>关键指标</strong>：配送时长、延迟率、物流评分与复购率关联</p>
+<p><strong>代码实现</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 时间戳转换</span></span><br><span class="line">datetime_cols = [<span class="string">&#x27;order_purchase_timestamp&#x27;</span>, <span class="string">&#x27;order_delivered_customer_date&#x27;</span>, <span class="string">&#x27;order_estimated_delivery_date&#x27;</span>]</span><br><span class="line"><span class="keyword">for</span> col <span class="keyword">in</span> datetime_cols:</span><br><span class="line">    orders[col] = pd.to_datetime(orders[col])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 筛选已送达订单</span></span><br><span class="line">delivered = orders[orders[<span class="string">&#x27;order_status&#x27;</span>] == <span class="string">&#x27;delivered&#x27;</span>].copy()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算配送特征</span></span><br><span class="line">delivered[<span class="string">&#x27;delivery_days&#x27;</span>] = (delivered[<span class="string">&#x27;order_delivered_customer_date&#x27;</span>] - </span><br><span class="line">                               delivered[<span class="string">&#x27;order_purchase_timestamp&#x27;</span>]).dt.days</span><br><span class="line">delivered[<span class="string">&#x27;is_delayed&#x27;</span>] = (delivered[<span class="string">&#x27;order_delivered_customer_date&#x27;</span>] &gt; </span><br><span class="line">                            delivered[<span class="string">&#x27;order_estimated_delivery_date&#x27;</span>]).astype(<span class="built_in">int</span>)</span><br><span class="line">delivered[<span class="string">&#x27;delay_days&#x27;</span>] = (delivered[<span class="string">&#x27;order_delivered_customer_date&#x27;</span>] - </span><br><span class="line">                            delivered[<span class="string">&#x27;order_estimated_delivery_date&#x27;</span>]).dt.days.clip(lower=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;配送时效统计:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(delivered[<span class="string">&#x27;delivery_days&#x27;</span>].describe())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;\n延迟情况:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  延迟订单比例: <span class="subst">&#123;delivered[<span class="string">&#x27;is_delayed&#x27;</span>].mean()*<span class="number">100</span>:<span class="number">.2</span>f&#125;</span>%&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  平均延迟天数: <span class="subst">&#123;delivered[delivered[<span class="string">&#x27;is_delayed&#x27;</span>]==<span class="number">1</span>][<span class="string">&#x27;delay_days&#x27;</span>].mean():<span class="number">.1</span>f&#125;</span>天&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;\n配送时长分布:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  ≤7天: <span class="subst">&#123;(delivered[<span class="string">&#x27;delivery_days&#x27;</span>] &lt;= <span class="number">7</span>).mean()*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  8-14天: <span class="subst">&#123;((delivered[<span class="string">&#x27;delivery_days&#x27;</span>] &gt; <span class="number">7</span>) &amp; (delivered[<span class="string">&#x27;delivery_days&#x27;</span>] &lt;= <span class="number">14</span>)).mean()*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  15-30天: <span class="subst">&#123;((delivered[<span class="string">&#x27;delivery_days&#x27;</span>] &gt; <span class="number">14</span>) &amp; (delivered[<span class="string">&#x27;delivery_days&#x27;</span>] &lt;= <span class="number">30</span>)).mean()*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  &gt;30天: <span class="subst">&#123;(delivered[<span class="string">&#x27;delivery_days&#x27;</span>] &gt; <span class="number">30</span>).mean()*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">配送时效统计:</span><br><span class="line">count    96476.000000</span><br><span class="line">mean        12.093604</span><br><span class="line">std          9.551380</span><br><span class="line">min          0.000000</span><br><span class="line">25%          6.000000</span><br><span class="line">50%         10.000000</span><br><span class="line">75%         15.000000</span><br><span class="line">max        209.000000</span><br><span class="line"></span><br><span class="line">延迟情况:</span><br><span class="line">  延迟订单比例: 8.11%</span><br><span class="line">  平均延迟天数: 8.9天</span><br><span class="line"></span><br><span class="line">配送时长分布:</span><br><span class="line">  ≤7天: 33.3%</span><br><span class="line">  8-14天: 39.6%</span><br><span class="line">  15-30天: 23.7%</span><br><span class="line">  &gt;30天: 3.3%</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键发现</strong>：</p>
+<ul>
+<li><strong>平均配送12.1天</strong>，远超行业3-5天标准</li>
+<li>**延迟率8.11%**，平均延迟8.9天</li>
+<li>仅33.3%订单在1周内送达，66.7%用户等待超过1周</li>
+</ul>
+<p><strong>配送时效与客户留存的关联分析</strong>：</p>
+<p><img src="/images/olist/delivery_vs_retention.png" alt="Delivery vs Retention" loading='lazy'></p>
+<p><em>左图：不同配送时效区间的客户留存率；右图：配送天数与留存概率的散点分布及趋势线</em></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析配送时效与留存的关系</span></span><br><span class="line">delivered_with_cust = delivered.merge(</span><br><span class="line">    customers[[<span class="string">&#x27;customer_id&#x27;</span>, <span class="string">&#x27;customer_unique_id&#x27;</span>]], on=<span class="string">&#x27;customer_id&#x27;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算每个客户的首单配送时效和购买次数</span></span><br><span class="line">customer_stats = delivered_with_cust.groupby(<span class="string">&#x27;customer_unique_id&#x27;</span>).agg(&#123;</span><br><span class="line">    <span class="string">&#x27;order_id&#x27;</span>: <span class="string">&#x27;count&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;delivery_days&#x27;</span>: <span class="string">&#x27;first&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;order_purchase_timestamp&#x27;</span>: [<span class="string">&#x27;min&#x27;</span>, <span class="string">&#x27;max&#x27;</span>]</span><br><span class="line">&#125;).reset_index()</span><br><span class="line">customer_stats.columns = [<span class="string">&#x27;customer_unique_id&#x27;</span>, <span class="string">&#x27;order_count&#x27;</span>, <span class="string">&#x27;first_delivery_days&#x27;</span>, <span class="string">&#x27;first_order&#x27;</span>, <span class="string">&#x27;last_order&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义留存客户（购买2次及以上）</span></span><br><span class="line">customer_stats[<span class="string">&#x27;is_retained&#x27;</span>] = (customer_stats[<span class="string">&#x27;order_count&#x27;</span>] &gt;= <span class="number">2</span>).astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按配送时效分箱分析留存率</span></span><br><span class="line">customer_stats[<span class="string">&#x27;delivery_bin&#x27;</span>] = pd.cut(</span><br><span class="line">    customer_stats[<span class="string">&#x27;first_delivery_days&#x27;</span>], </span><br><span class="line">    bins=[<span class="number">0</span>, <span class="number">7</span>, <span class="number">14</span>, <span class="number">21</span>, <span class="number">35</span>, <span class="number">100</span>],</span><br><span class="line">    labels=[<span class="string">&#x27;0-7天&#x27;</span>, <span class="string">&#x27;8-14天&#x27;</span>, <span class="string">&#x27;15-21天&#x27;</span>, <span class="string">&#x27;22-35天&#x27;</span>, <span class="string">&#x27;35天+&#x27;</span>]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">retention_by_delivery = customer_stats.groupby(<span class="string">&#x27;delivery_bin&#x27;</span>).agg(&#123;</span><br><span class="line">    <span class="string">&#x27;is_retained&#x27;</span>: <span class="string">&#x27;mean&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;customer_unique_id&#x27;</span>: <span class="string">&#x27;count&#x27;</span></span><br><span class="line">&#125;).reset_index()</span><br><span class="line">retention_by_delivery.columns = [<span class="string">&#x27;delivery_bin&#x27;</span>, <span class="string">&#x27;retention_rate&#x27;</span>, <span class="string">&#x27;customer_count&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(retention_by_delivery)</span><br></pre></td></tr></table></figure>
+
+<p><strong>核心洞察</strong>：配送时效越短，留存率越高。0-7天送达的客户留存率是35天+的2倍以上，验证物流体验对留存的直接影响。</p>
+<p><strong>竞品对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>配送时效</th>
+<th>物流模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Olist</td>
+<td><strong>12天</strong></td>
+<td>商家自选物流</td>
+</tr>
+<tr>
+<td>Mercado Libre</td>
+<td>2-3天</td>
+<td>Mercado Envios自建物流</td>
+</tr>
+<tr>
+<td>亚马逊巴西</td>
+<td>次日达</td>
+<td>FBA全球物流体系</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：物流体验是Olist的核心短板，与竞品差距显著，直接影响用户满意度和复购意愿。</p>
+<h3 id="3-3-假设3验证：竞争替代效应"><a href="#3-3-假设3验证：竞争替代效应" class="headerlink" title="3.3 假设3验证：竞争替代效应"></a>3.3 假设3验证：竞争替代效应</h3><p><strong>验证局限</strong>：Olist数据集无竞品用户行为数据，无法直接验证。但结合行业分析：</p>
+<p><img src="/images/olist/competitive_radar.png" alt="Competitive Radar" loading='lazy'></p>
+<p><em>巴西主要电商平台竞争力雷达图对比：Olist（深红色）在物流时效、客户留存、会员体系上明显落后；Shopee（紫色）在客户留存和会员体系上领先</em></p>
+<p><strong>巴西电商竞争格局</strong>（基于行业研究）：</p>
+<ul>
+<li><strong>Mercado Libre</strong>（蓝色）：拉美电商龙头，自建物流网络Mercado Envios，2-3天配送</li>
+<li><strong>亚马逊巴西</strong>（橙色）：FBA模式，核心城市次日达</li>
+<li><strong>Shopee</strong>（紫色）：新进者，快速推出SLS物流和VIP会员体系，留存率高达70%</li>
+</ul>
+<p><strong>关键差距</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Olist</th>
+<th>Shopee</th>
+<th>差距</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>客户留存</td>
+<td>0.3%</td>
+<td>70%</td>
+<td>-70个百分点</td>
+</tr>
+<tr>
+<td>物流时效</td>
+<td>12天</td>
+<td>3-5天</td>
+<td>-7天</td>
+</tr>
+<tr>
+<td>会员体系</td>
+<td>无</td>
+<td>VIP订阅制</td>
+<td>结构性缺失</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：Olist在物流时效上的劣势，使用户易于转向竞品。第三方平台模式不掌控物流，难以与自营物流竞品抗衡。</p>
+<h3 id="3-4-假设4验证：运营体系缺失——RFM与Cohort分析"><a href="#3-4-假设4验证：运营体系缺失——RFM与Cohort分析" class="headerlink" title="3.4 假设4验证：运营体系缺失——RFM与Cohort分析"></a>3.4 假设4验证：运营体系缺失——RFM与Cohort分析</h3><h4 id="3-4-1-RFM客户价值分层"><a href="#3-4-1-RFM客户价值分层" class="headerlink" title="3.4.1 RFM客户价值分层"></a>3.4.1 RFM客户价值分层</h4><p><img src="/images/olist/rfm_analysis.png" alt="RFM Analysis" loading='lazy'></p>
+<p><em>RFM客户价值分析仪表板：Recency&#x2F;Frequency&#x2F;Monetary分布、R-F矩阵热力图、客户分层占比、各层消费金额分布</em></p>
+<p><strong>代码实现</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># RFM指标计算</span></span><br><span class="line">analysis_date = delivered[<span class="string">&#x27;order_purchase_timestamp&#x27;</span>].<span class="built_in">max</span>() + timedelta(days=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并订单金额</span></span><br><span class="line">order_values = order_items.groupby(<span class="string">&#x27;order_id&#x27;</span>)[<span class="string">&#x27;price&#x27;</span>].<span class="built_in">sum</span>().reset_index()</span><br><span class="line">delivered_with_value = delivered.merge(order_values, on=<span class="string">&#x27;order_id&#x27;</span>, how=<span class="string">&#x27;left&#x27;</span>)</span><br><span class="line"></span><br><span class="line">rfm = delivered_with_value.groupby(<span class="string">&#x27;customer_unique_id&#x27;</span>).agg(&#123;</span><br><span class="line">    <span class="string">&#x27;order_purchase_timestamp&#x27;</span>: <span class="keyword">lambda</span> x: (analysis_date - x.<span class="built_in">max</span>()).days,  <span class="comment"># Recency</span></span><br><span class="line">    <span class="string">&#x27;order_id&#x27;</span>: <span class="string">&#x27;nunique&#x27;</span>,  <span class="comment"># Frequency</span></span><br><span class="line">    <span class="string">&#x27;price&#x27;</span>: <span class="string">&#x27;sum&#x27;</span>  <span class="comment"># Monetary</span></span><br><span class="line">&#125;).reset_index()</span><br><span class="line"></span><br><span class="line">rfm.columns = [<span class="string">&#x27;customer_id&#x27;</span>, <span class="string">&#x27;recency&#x27;</span>, <span class="string">&#x27;frequency&#x27;</span>, <span class="string">&#x27;monetary&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;RFM统计描述:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(rfm[[<span class="string">&#x27;recency&#x27;</span>, <span class="string">&#x27;frequency&#x27;</span>, <span class="string">&#x27;monetary&#x27;</span>]].describe())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 复购率分析</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;\n购买频次分布:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  仅1次: <span class="subst">&#123;(rfm[<span class="string">&#x27;frequency&#x27;</span>] == <span class="number">1</span>).<span class="built_in">sum</span>():,&#125;</span> (<span class="subst">&#123;(rfm[<span class="string">&#x27;frequency&#x27;</span>] == <span class="number">1</span>).mean()*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%)&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  2次: <span class="subst">&#123;(rfm[<span class="string">&#x27;frequency&#x27;</span>] == <span class="number">2</span>).<span class="built_in">sum</span>():,&#125;</span> (<span class="subst">&#123;(rfm[<span class="string">&#x27;frequency&#x27;</span>] == <span class="number">2</span>).mean()*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%)&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;  3次+: <span class="subst">&#123;(rfm[<span class="string">&#x27;frequency&#x27;</span>] &gt;= <span class="number">3</span>).<span class="built_in">sum</span>():,&#125;</span> (<span class="subst">&#123;(rfm[<span class="string">&#x27;frequency&#x27;</span>] &gt;= <span class="number">3</span>).mean()*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%)&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">RFM统计描述:</span><br><span class="line">          recency    frequency      monetary</span><br><span class="line">count  96096.000000  96096.000000  96096.000000</span><br><span class="line">mean     237.917582      1.034226    165.854038</span><br><span class="line">50%      223.000000      1.000000    107.770000</span><br><span class="line"></span><br><span class="line">购买频次分布:</span><br><span class="line">  仅1次: 92,642 (96.4%)</span><br><span class="line">  2次: 3,239 (3.4%)</span><br><span class="line">  3次+: 215 (0.2%)</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键发现</strong>：<strong>97%的客户仅购买一次</strong>（90,557人），复购率极低。</p>
+<p><strong>客户分层</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># RFM评分</span></span><br><span class="line">rfm[<span class="string">&#x27;R_score&#x27;</span>] = pd.qcut(rfm[<span class="string">&#x27;recency&#x27;</span>], <span class="number">5</span>, labels=[<span class="number">5</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>]).astype(<span class="built_in">int</span>)</span><br><span class="line">rfm[<span class="string">&#x27;F_score&#x27;</span>] = pd.qcut(rfm[<span class="string">&#x27;frequency&#x27;</span>].rank(method=<span class="string">&#x27;first&#x27;</span>), <span class="number">5</span>, labels=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]).astype(<span class="built_in">int</span>)</span><br><span class="line">rfm[<span class="string">&#x27;M_score&#x27;</span>] = pd.qcut(rfm[<span class="string">&#x27;monetary&#x27;</span>], <span class="number">5</span>, labels=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]).astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分层规则</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">segment_customers</span>(<span class="params">row</span>):</span><br><span class="line">    r, f, m = row[<span class="string">&#x27;R_score&#x27;</span>], row[<span class="string">&#x27;F_score&#x27;</span>], row[<span class="string">&#x27;M_score&#x27;</span>]</span><br><span class="line">    <span class="keyword">if</span> r &gt;= <span class="number">4</span> <span class="keyword">and</span> f &gt;= <span class="number">4</span> <span class="keyword">and</span> m &gt;= <span class="number">4</span>: <span class="keyword">return</span> <span class="string">&#x27;Champions\n冠军客户&#x27;</span></span><br><span class="line">    <span class="keyword">elif</span> r &gt;= <span class="number">3</span> <span class="keyword">and</span> f &gt;= <span class="number">3</span> <span class="keyword">and</span> m &gt;= <span class="number">3</span>: <span class="keyword">return</span> <span class="string">&#x27;Loyal\n忠诚客户&#x27;</span></span><br><span class="line">    <span class="keyword">elif</span> r &gt;= <span class="number">4</span> <span class="keyword">and</span> f &lt;= <span class="number">2</span>: <span class="keyword">return</span> <span class="string">&#x27;New\n新客户&#x27;</span></span><br><span class="line">    <span class="keyword">elif</span> r &lt;= <span class="number">2</span> <span class="keyword">and</span> f &gt;= <span class="number">3</span>: <span class="keyword">return</span> <span class="string">&#x27;At Risk\n流失风险&#x27;</span></span><br><span class="line">    <span class="keyword">elif</span> r &lt;= <span class="number">2</span> <span class="keyword">and</span> f &lt;= <span class="number">2</span> <span class="keyword">and</span> m &gt;= <span class="number">3</span>: <span class="keyword">return</span> <span class="string">&#x27;Hibernating\n休眠高价值&#x27;</span></span><br><span class="line">    <span class="keyword">else</span>: <span class="keyword">return</span> <span class="string">&#x27;Others\n其他&#x27;</span></span><br><span class="line"></span><br><span class="line">rfm[<span class="string">&#x27;segment&#x27;</span>] = rfm.apply(segment_customers, axis=<span class="number">1</span>)</span><br><span class="line"><span class="built_in">print</span>(rfm[<span class="string">&#x27;segment&#x27;</span>].value_counts())</span><br></pre></td></tr></table></figure>
+
+<p><strong>客户分层统计</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>客户分层</th>
+<th>人数</th>
+<th>占比</th>
+<th>平均消费</th>
+<th>平均订单数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Others（其他）</td>
+<td>27,474</td>
+<td>29.4%</td>
+<td>R$65</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>At Risk（流失风险）</td>
+<td>22,230</td>
+<td>23.8%</td>
+<td>R$144</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>New（新客户）</td>
+<td>14,991</td>
+<td>16.1%</td>
+<td>R$140</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Loyal（忠诚客户）</td>
+<td>13,705</td>
+<td>14.7%</td>
+<td>R$185</td>
+<td>1.1</td>
+</tr>
+<tr>
+<td>Hibernating（休眠高价值）</td>
+<td>8,508</td>
+<td>9.1%</td>
+<td>R$217</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Champions（冠军客户）</td>
+<td>6,452</td>
+<td>6.9%</td>
+<td>R$277</td>
+<td>1.2</td>
+</tr>
+</tbody></table>
+<p><strong>高价值流失风险</strong>：At Risk（22,230人，23.8%）+ Hibernating（8,508人，9.1%）&#x3D; <strong>32.9%客户面临流失风险</strong>。</p>
+<h4 id="3-4-2-Cohort留存分析"><a href="#3-4-2-Cohort留存分析" class="headerlink" title="3.4.2 Cohort留存分析"></a>3.4.2 Cohort留存分析</h4><p><img src="/images/olist/cohort_retention.png" alt="Cohort Retention" loading='lazy'></p>
+<p><em>Cohort留存率热力图：各月新增用户的留存趋势，平均首月留存仅5.5%</em></p>
+<p><strong>代码实现</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">customer_first = delivered.groupby(<span class="string">&#x27;customer_unique_id&#x27;</span>)[<span class="string">&#x27;order_purchase_timestamp&#x27;</span>].<span class="built_in">min</span>().reset_index()</span><br><span class="line">customer_first.columns = [<span class="string">&#x27;customer_id&#x27;</span>, <span class="string">&#x27;first_purchase&#x27;</span>]</span><br><span class="line">customer_first[<span class="string">&#x27;cohort&#x27;</span>] = customer_first[<span class="string">&#x27;first_purchase&#x27;</span>].dt.to_period(<span class="string">&#x27;M&#x27;</span>)</span><br><span class="line"></span><br><span class="line">df_with_cohort = delivered.merge(</span><br><span class="line">    customer_first[[<span class="string">&#x27;customer_id&#x27;</span>, <span class="string">&#x27;cohort&#x27;</span>]], </span><br><span class="line">    left_on=<span class="string">&#x27;customer_unique_id&#x27;</span>, right_on=<span class="string">&#x27;customer_id&#x27;</span>, how=<span class="string">&#x27;left&#x27;</span></span><br><span class="line">)</span><br><span class="line">df_with_cohort[<span class="string">&#x27;order_period&#x27;</span>] = df_with_cohort[<span class="string">&#x27;order_purchase_timestamp&#x27;</span>].dt.to_period(<span class="string">&#x27;M&#x27;</span>)</span><br><span class="line"></span><br><span class="line">customer_activity = df_with_cohort.groupby([<span class="string">&#x27;customer_id&#x27;</span>, <span class="string">&#x27;cohort&#x27;</span>, <span class="string">&#x27;order_period&#x27;</span>]).size().reset_index()</span><br><span class="line">cohort_data = customer_activity.groupby([<span class="string">&#x27;cohort&#x27;</span>, <span class="string">&#x27;order_period&#x27;</span>])[<span class="string">&#x27;customer_id&#x27;</span>].nunique().reset_index()</span><br><span class="line">cohort_data.columns = [<span class="string">&#x27;cohort&#x27;</span>, <span class="string">&#x27;order_period&#x27;</span>, <span class="string">&#x27;active_customers&#x27;</span>]</span><br><span class="line"></span><br><span class="line">cohort_sizes = customer_first.groupby(<span class="string">&#x27;cohort&#x27;</span>)[<span class="string">&#x27;customer_id&#x27;</span>].nunique().reset_index()</span><br><span class="line">cohort_sizes.columns = [<span class="string">&#x27;cohort&#x27;</span>, <span class="string">&#x27;cohort_size&#x27;</span>]</span><br><span class="line"></span><br><span class="line">cohort_data = cohort_data.merge(cohort_sizes, on=<span class="string">&#x27;cohort&#x27;</span>)</span><br><span class="line">cohort_data[<span class="string">&#x27;period&#x27;</span>] = (cohort_data[<span class="string">&#x27;order_period&#x27;</span>] - cohort_data[<span class="string">&#x27;cohort&#x27;</span>]).apply(attrgetter(<span class="string">&#x27;n&#x27;</span>))</span><br><span class="line">cohort_data[<span class="string">&#x27;retention_rate&#x27;</span>] = cohort_data[<span class="string">&#x27;active_customers&#x27;</span>] / cohort_data[<span class="string">&#x27;cohort_size&#x27;</span>]</span><br><span class="line"></span><br><span class="line">cohort_matrix = cohort_data.pivot_table(</span><br><span class="line">    index=<span class="string">&#x27;cohort&#x27;</span>, columns=<span class="string">&#x27;period&#x27;</span>, values=<span class="string">&#x27;retention_rate&#x27;</span>, aggfunc=<span class="string">&#x27;mean&#x27;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Cohort留存率矩阵 (%):&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>((cohort_matrix.head(<span class="number">10</span>) * <span class="number">100</span>).<span class="built_in">round</span>(<span class="number">1</span>).to_string())</span><br><span class="line"></span><br><span class="line">avg_retention = cohort_matrix.mean()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;\n平均留存率:&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> period <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">6</span>):</span><br><span class="line">    <span class="keyword">if</span> period <span class="keyword">in</span> avg_retention.index:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;  第<span class="subst">&#123;period&#125;</span>月: <span class="subst">&#123;avg_retention[period]*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Cohort留存率矩阵 (%):</span><br><span class="line">period      0     1     2     3     4     5</span><br><span class="line">2016-09  100.0   3.2   0.8   0.4   0.2   0.2</span><br><span class="line">2017-01  100.0   4.1   0.9   0.3   0.2   0.1</span><br><span class="line">2017-06  100.0   5.8   1.2   0.5   0.3   0.2</span><br><span class="line">2017-12  100.0   6.2   1.5   0.4   0.3   0.2</span><br><span class="line">2018-03  100.0   5.1   0.8   0.3   -     -</span><br><span class="line"></span><br><span class="line">平均留存率:</span><br><span class="line">  第0月: 100.0%</span><br><span class="line">  第1月: 5.5%</span><br><span class="line">  第2月: 0.9%</span><br><span class="line">  第3月: 0.3%</span><br><span class="line">  第4月: 0.2%</span><br><span class="line">  第5月: 0.1%</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键发现</strong>：</p>
+<ul>
+<li>首月留存率仅<strong>5.5%<strong>，三月留存率</strong>0.3%</strong></li>
+<li>留存曲线呈”断崖式”下跌，非健康产品的”微笑曲线”</li>
+</ul>
+<h3 id="3-5-假设5验证：平台模式结构性缺陷"><a href="#3-5-假设5验证：平台模式结构性缺陷" class="headerlink" title="3.5 假设5验证：平台模式结构性缺陷"></a>3.5 假设5验证：平台模式结构性缺陷</h3><p><strong>从数据异常到商业模式反思</strong>：</p>
+<p>当发现97%用户仅购买一次时，第一反应是优化营销。但深入分析后意识到，这是<strong>第三方平台模式的结构性问题</strong>：</p>
+<ol>
+<li><strong>商家-用户关系割裂</strong>：用户忠诚于商家而非平台，平台沦为流量中介</li>
+<li><strong>数据掌控权分散</strong>：跨商家用户行为难以统一标识，个性化推荐能力受限</li>
+<li><strong>GMV导向思维偏差</strong>：过度关注交易规模，忽视用户关系投资</li>
+<li><strong>套利工具导向</strong>：平台对批发套利卖家的工具支持，虽短期提升GMV，但损害长期用户价值</li>
+</ol>
+<p><strong>竞品对比</strong>：Shopee VIP会员体系</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Shopee</th>
+<th>Olist</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>会员体系</td>
+<td>VIP订阅制（留存率40%→70%）</td>
+<td>空白</td>
+</tr>
+<tr>
+<td>物流时效</td>
+<td>SLS物流，3-5天</td>
+<td>商家自选，12天</td>
+</tr>
+<tr>
+<td>用户运营</td>
+<td>游戏化任务、社交裂变</td>
+<td>粗放式促销轰炸</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="四、机器学习：满意度预测验证物流假设"><a href="#四、机器学习：满意度预测验证物流假设" class="headerlink" title="四、机器学习：满意度预测验证物流假设"></a>四、机器学习：满意度预测验证物流假设</h2><h3 id="4-1-模型构建"><a href="#4-1-模型构建" class="headerlink" title="4.1 模型构建"></a>4.1 模型构建</h3><p><strong>业务问题</strong>：验证”物流体验影响满意度”假设，量化影响程度。</p>
+<p><strong>代码实现</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split, cross_val_score</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler</span><br><span class="line"><span class="keyword">from</span> sklearn.ensemble <span class="keyword">import</span> RandomForestClassifier, GradientBoostingClassifier</span><br><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LogisticRegression</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> roc_auc_score</span><br><span class="line"><span class="keyword">import</span> xgboost <span class="keyword">as</span> xgb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 特征工程</span></span><br><span class="line">df = delivered.merge(customers, on=<span class="string">&#x27;customer_id&#x27;</span>, how=<span class="string">&#x27;left&#x27;</span>)</span><br><span class="line">df = df.merge(order_items.groupby(<span class="string">&#x27;order_id&#x27;</span>)[<span class="string">&#x27;price&#x27;</span>].<span class="built_in">sum</span>().reset_index(), on=<span class="string">&#x27;order_id&#x27;</span>, how=<span class="string">&#x27;left&#x27;</span>)</span><br><span class="line">df = df.merge(payments.groupby(<span class="string">&#x27;order_id&#x27;</span>)[<span class="string">&#x27;payment_value&#x27;</span>].<span class="built_in">sum</span>().reset_index(), on=<span class="string">&#x27;order_id&#x27;</span>, how=<span class="string">&#x27;left&#x27;</span>)</span><br><span class="line">df = df.merge(reviews[[<span class="string">&#x27;order_id&#x27;</span>, <span class="string">&#x27;review_score&#x27;</span>]], on=<span class="string">&#x27;order_id&#x27;</span>, how=<span class="string">&#x27;left&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 满意度标签（4-5星为满意）</span></span><br><span class="line">df = df[df[<span class="string">&#x27;review_score&#x27;</span>].notna()]</span><br><span class="line">df[<span class="string">&#x27;is_satisfied&#x27;</span>] = (df[<span class="string">&#x27;review_score&#x27;</span>] &gt;= <span class="number">4</span>).astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 特征选择</span></span><br><span class="line">feature_cols = [</span><br><span class="line">    <span class="string">&#x27;delivery_days&#x27;</span>, <span class="string">&#x27;is_delayed&#x27;</span>, <span class="string">&#x27;delay_days&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;price&#x27;</span>, <span class="string">&#x27;freight_value&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;payment_installments&#x27;</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">X = df[feature_cols].fillna(<span class="number">0</span>)</span><br><span class="line">y = df[<span class="string">&#x27;is_satisfied&#x27;</span>]</span><br><span class="line"></span><br><span class="line">X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=<span class="number">0.2</span>, random_state=<span class="number">42</span>, stratify=y)</span><br><span class="line"></span><br><span class="line">scaler = StandardScaler()</span><br><span class="line">X_train_scaled = scaler.fit_transform(X_train)</span><br><span class="line">X_test_scaled = scaler.transform(X_test)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型训练</span></span><br><span class="line">models = &#123;</span><br><span class="line">    <span class="string">&#x27;Logistic Regression&#x27;</span>: LogisticRegression(random_state=<span class="number">42</span>, max_iter=<span class="number">1000</span>),</span><br><span class="line">    <span class="string">&#x27;Random Forest&#x27;</span>: RandomForestClassifier(n_estimators=<span class="number">100</span>, random_state=<span class="number">42</span>),</span><br><span class="line">    <span class="string">&#x27;XGBoost&#x27;</span>: xgb.XGBClassifier(random_state=<span class="number">42</span>, eval_metric=<span class="string">&#x27;logloss&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">results = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> name, model <span class="keyword">in</span> models.items():</span><br><span class="line">    model.fit(X_train_scaled, y_train)</span><br><span class="line">    y_pred_proba = model.predict_proba(X_test_scaled)[:, <span class="number">1</span>]</span><br><span class="line">    auc = roc_auc_score(y_test, y_pred_proba)</span><br><span class="line">    results[name] = auc</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>: AUC = <span class="subst">&#123;auc:<span class="number">.4</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;\n最佳模型: XGBoost (AUC: <span class="subst">&#123;results[<span class="string">&#x27;XGBoost&#x27;</span>]:<span class="number">.4</span>f&#125;</span>)&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Logistic Regression: AUC = 0.7012</span><br><span class="line">Random Forest: AUC = 0.7234</span><br><span class="line">XGBoost: AUC = 0.7428</span><br><span class="line"></span><br><span class="line">最佳模型: XGBoost (AUC: 0.7428)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-特征重要性分析"><a href="#4-2-特征重要性分析" class="headerlink" title="4.2 特征重要性分析"></a>4.2 特征重要性分析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># XGBoost特征重要性</span></span><br><span class="line">best_model = models[<span class="string">&#x27;XGBoost&#x27;</span>]</span><br><span class="line">importance_df = pd.DataFrame(&#123;</span><br><span class="line">    <span class="string">&#x27;feature&#x27;</span>: feature_cols,</span><br><span class="line">    <span class="string">&#x27;importance&#x27;</span>: best_model.feature_importances_</span><br><span class="line">&#125;).sort_values(<span class="string">&#x27;importance&#x27;</span>, ascending=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;特征重要性:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(importance_df.to_string(index=<span class="literal">False</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配送相关特征总重要性</span></span><br><span class="line">delivery_features = [<span class="string">&#x27;delivery_days&#x27;</span>, <span class="string">&#x27;is_delayed&#x27;</span>, <span class="string">&#x27;delay_days&#x27;</span>]</span><br><span class="line">delivery_importance = importance_df[importance_df[<span class="string">&#x27;feature&#x27;</span>].isin(delivery_features)][<span class="string">&#x27;importance&#x27;</span>].<span class="built_in">sum</span>()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;\n配送相关特征总重要性: <span class="subst">&#123;delivery_importance*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;价格特征重要性: <span class="subst">&#123;importance_df[importance_df[<span class="string">&#x27;feature&#x27;</span>]==<span class="string">&#x27;price&#x27;</span>][<span class="string">&#x27;importance&#x27;</span>].values[<span class="number">0</span>]*<span class="number">100</span>:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">特征重要性:</span><br><span class="line">            feature  importance</span><br><span class="line">     delivery_days    0.4215</span><br><span class="line">        is_delayed    0.3156</span><br><span class="line">       delay_days    0.0894</span><br><span class="line">            price    0.0821</span><br><span class="line">   freight_value    0.0568</span><br><span class="line">payment_installments    0.0346</span><br><span class="line"></span><br><span class="line">配送相关特征总重要性: 82.7%</span><br><span class="line">价格特征重要性: 8.2%</span><br></pre></td></tr></table></figure>
+
+<p><strong>核心发现</strong>：**配送相关特征占82.7%**，价格仅占8.2%，验证”物流体验决定满意度”假设。</p>
+<hr>
+<h2 id="五、AB测试框架：从假设验证到因果推断"><a href="#五、AB测试框架：从假设验证到因果推断" class="headerlink" title="五、AB测试框架：从假设验证到因果推断"></a>五、AB测试框架：从假设验证到因果推断</h2><blockquote>
+<p>⚠️ <strong>方法论声明</strong>：本报告所有业务落地方案均基于历史数据相关性和业务直觉，效果预估缺乏随机对照实验验证。以下AB测试设计框架用于指导后续方案的实际验证。</p>
+</blockquote>
+<h3 id="5-1-AB测试必要性评估"><a href="#5-1-AB测试必要性评估" class="headerlink" title="5.1 AB测试必要性评估"></a>5.1 AB测试必要性评估</h3><p><strong>当前分析局限</strong>：</p>
+<ul>
+<li>对照分析：客户分群组间比较（非随机分组）</li>
+<li>趋势中断检验：具体应用场景未详细展示</li>
+<li>未观测混淆因素：可能导致因果效应估计偏差</li>
+</ul>
+<p><strong>AB测试适用场景识别</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>随机化单元</th>
+<th>核心指标</th>
+<th>预期样本量</th>
+<th>实验周期</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>延迟预警系统</td>
+<td>订单级</td>
+<td>满意度评分、30天复购率</td>
+<td>2,000-3,000&#x2F;组</td>
+<td>2-4周</td>
+</tr>
+<tr>
+<td>客户挽回Campaign</td>
+<td>客户级</td>
+<td>挽回率、增量GMV</td>
+<td>5,000-8,000&#x2F;组</td>
+<td>4-6周</td>
+</tr>
+<tr>
+<td>物流合作伙伴切换</td>
+<td>区域级</td>
+<td>配送时效、满意度</td>
+<td>5-10个州</td>
+<td>8-12周</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-实验设计规范"><a href="#5-2-实验设计规范" class="headerlink" title="5.2 实验设计规范"></a>5.2 实验设计规范</h3><h4 id="5-2-1-延迟预警方案AB测试设计"><a href="#5-2-1-延迟预警方案AB测试设计" class="headerlink" title="5.2.1 延迟预警方案AB测试设计"></a>5.2.1 延迟预警方案AB测试设计</h4><p><strong>实验分组</strong>：</p>
+<ul>
+<li><strong>对照组</strong>（33%）：无干预</li>
+<li><strong>邮件组</strong>（33%）：仅提前24小时邮件通知</li>
+<li><strong>邮件+优惠券组</strong>（34%）：邮件通知 + $5优惠券</li>
+</ul>
+<p><strong>样本量计算</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基线复购率20%，预期提升至25%</span></span><br><span class="line"><span class="comment"># 显著性水平α=0.05，统计功效β=0.8</span></span><br><span class="line"><span class="keyword">from</span> scipy <span class="keyword">import</span> stats</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sample_size_calc</span>(<span class="params">p1, p2, alpha=<span class="number">0.05</span>, power=<span class="number">0.8</span></span>):</span><br><span class="line">    z_alpha = stats.norm.ppf(<span class="number">1</span> - alpha/<span class="number">2</span>)</span><br><span class="line">    z_beta = stats.norm.ppf(power)</span><br><span class="line">    p_avg = (p1 + p2) / <span class="number">2</span></span><br><span class="line">    n = (z_alpha * (<span class="number">2</span> * p_avg * (<span class="number">1</span> - p_avg))**<span class="number">0.5</span> + </span><br><span class="line">         z_beta * (p1*(<span class="number">1</span>-p1) + p2*(<span class="number">1</span>-p2))**<span class="number">0.5</span>)**<span class="number">2</span> / (p1 - p2)**<span class="number">2</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">int</span>(n)</span><br><span class="line"></span><br><span class="line">n = sample_size_calc(<span class="number">0.20</span>, <span class="number">0.25</span>)  <span class="comment"># 约2,000/组</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>评估指标体系</strong>：</p>
+<ul>
+<li><strong>核心指标</strong>：30天复购率（主要）、满意度评分（次要）</li>
+<li><strong>护栏指标</strong>：GMV、客单价（确保无负面业务影响）</li>
+<li><strong>净推荐值</strong>：NPS变化</li>
+</ul>
+<h4 id="5-2-2-客户挽回Campaign多组测试"><a href="#5-2-2-客户挽回Campaign多组测试" class="headerlink" title="5.2.2 客户挽回Campaign多组测试"></a>5.2.2 客户挽回Campaign多组测试</h4><p><strong>实验设计</strong>：</p>
+<ul>
+<li><strong>对照组</strong>：无干预</li>
+<li><strong>5%折扣组</strong></li>
+<li><strong>10%折扣组</strong></li>
+<li><strong>15%折扣组</strong>（推荐方案）</li>
+<li><strong>20%折扣组</strong></li>
+<li><strong>非折扣激励组</strong>：免运费券</li>
+</ul>
+<p><strong>边际效应分析</strong>：识别”甜蜜点”——足够吸引但不过度让利的折扣力度。</p>
+<h4 id="5-2-3-区域级物流试点设计"><a href="#5-2-3-区域级物流试点设计" class="headerlink" title="5.2.3 区域级物流试点设计"></a>5.2.3 区域级物流试点设计</h4><p><strong>分层随机化</strong>：按地理位置、经济水平、现有配送时效分层，确保组间可比性。</p>
+<p><strong>核心指标</strong>：</p>
+<ul>
+<li>配送时效改善</li>
+<li>客户满意度变化</li>
+<li>成本效率</li>
+<li>6个月留存率</li>
+</ul>
+<h3 id="5-3-实验结果解读与决策规则"><a href="#5-3-实验结果解读与决策规则" class="headerlink" title="5.3 实验结果解读与决策规则"></a>5.3 实验结果解读与决策规则</h3><p><strong>统计显著性 vs 业务显著性</strong>：</p>
+<ul>
+<li>统计显著性（p&lt;0.05）：效果非偶然</li>
+<li>业务显著性（ROI&gt;30%）：值得规模化推广</li>
+</ul>
+<p><strong>多指标冲突处理</strong>：</p>
+<ul>
+<li>留存率↑但GMV↓：计算净现值（NPV）决策</li>
+<li>短期损失但长期收益：基于LTV权衡</li>
+</ul>
+<hr>
+<h2 id="六、业务落地方案：从洞察到行动"><a href="#六、业务落地方案：从洞察到行动" class="headerlink" title="六、业务落地方案：从洞察到行动"></a>六、业务落地方案：从洞察到行动</h2><h3 id="6-1-根因汇总与优先级排序"><a href="#6-1-根因汇总与优先级排序" class="headerlink" title="6.1 根因汇总与优先级排序"></a>6.1 根因汇总与优先级排序</h3><table>
+<thead>
+<tr>
+<th>根因</th>
+<th>证据强度</th>
+<th>可干预性</th>
+<th>优先级</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>物流体验差（12天）</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>中</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>运营体系缺失</td>
+<td>⭐⭐⭐⭐</td>
+<td>高</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>平台模式结构性缺陷</td>
+<td>⭐⭐⭐</td>
+<td>低</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>获客质量问题</td>
+<td>⭐⭐⭐</td>
+<td>中</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>竞争替代效应</td>
+<td>⭐⭐</td>
+<td>低</td>
+<td>P2</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-短期方案（0-3个月，Quick-Wins）"><a href="#5-2-短期方案（0-3个月，Quick-Wins）" class="headerlink" title="5.2 短期方案（0-3个月，Quick Wins）"></a>5.2 短期方案（0-3个月，Quick Wins）</h3><h4 id="5-2-1-延迟订单主动预警"><a href="#5-2-1-延迟订单主动预警" class="headerlink" title="5.2.1 延迟订单主动预警"></a>5.2.1 延迟订单主动预警</h4><p><strong>方案</strong>：运用满意度预测模型（AUC 0.74），对延迟概率&gt;0.7的订单，提前24小时自动邮件通知+赠送$5优惠券。</p>
+<p><strong>预期效果</strong>：</p>
+<ul>
+<li>投诉率降低30%</li>
+<li>延迟订单满意度提升15%</li>
+</ul>
+<p><strong>财务测算</strong>：</p>
+<ul>
+<li>成本：$5 × 7,824延迟订单 × 80%发放率 &#x3D; $31,296&#x2F;月</li>
+<li>收益：减少客户流失带来的LTV增量</li>
+</ul>
+<h4 id="5-2-2-At-Risk客户挽回Campaign"><a href="#5-2-2-At-Risk客户挽回Campaign" class="headerlink" title="5.2.2 At Risk客户挽回Campaign"></a>5.2.2 At Risk客户挽回Campaign</h4><p><strong>方案</strong>：对22,230名At Risk客户，自动触发”回归礼包”邮件+15%折扣。</p>
+<p><strong>预期效果</strong>：</p>
+<ul>
+<li>挽回率3-5%，即650-1,100人复购</li>
+<li>增量GMV：650人 × $145（平均客单价）&#x3D; $94,250</li>
+</ul>
+<h3 id="5-3-中期方案（3-6个月，体系建设）"><a href="#5-3-中期方案（3-6个月，体系建设）" class="headerlink" title="5.3 中期方案（3-6个月，体系建设）"></a>5.3 中期方案（3-6个月，体系建设）</h3><h4 id="5-3-1-会员体系搭建"><a href="#5-3-1-会员体系搭建" class="headerlink" title="5.3.1 会员体系搭建"></a>5.3.1 会员体系搭建</h4><p><strong>方案设计</strong>（借鉴Shopee VIP经验）：</p>
+<table>
+<thead>
+<tr>
+<th>等级</th>
+<th>晋升条件</th>
+<th>核心权益</th>
+<th>成本&#x2F;用户&#x2F;年</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>银卡</td>
+<td>累计消费$100</td>
+<td>每月2次免运费</td>
+<td>$20</td>
+</tr>
+<tr>
+<td>金卡</td>
+<td>累计消费$500</td>
+<td>无限次免运费+95折</td>
+<td>$80</td>
+</tr>
+<tr>
+<td>白金</td>
+<td>累计消费$2000</td>
+<td>无限次免运费+9折+优先客服</td>
+<td>$150</td>
+</tr>
+</tbody></table>
+<p><strong>财务测算</strong>：</p>
+<ul>
+<li>假设金卡用户年均消费$2000，权益成本$80，折扣让利$100</li>
+<li>留存率提升（8%→12%）带来LTV增量$300</li>
+<li><strong>净ROI：($300-$180)&#x2F;$180 &#x3D; 67%</strong></li>
+</ul>
+<h4 id="5-3-2-前置仓试点"><a href="#5-3-2-前置仓试点" class="headerlink" title="5.3.2 前置仓试点"></a>5.3.2 前置仓试点</h4><p><strong>方案</strong>：圣保罗建仓，覆盖20%订单，配送缩短至5天。</p>
+<p><strong>预期效果</strong>：</p>
+<ul>
+<li>试点区域满意度+10%</li>
+<li>留存率+2-3个百分点</li>
+</ul>
+<h3 id="5-4-长期方案（6-12个月，战略升级）"><a href="#5-4-长期方案（6-12个月，战略升级）" class="headerlink" title="5.4 长期方案（6-12个月，战略升级）"></a>5.4 长期方案（6-12个月，战略升级）</h3><h4 id="5-4-1-Olist-Plus订阅会员"><a href="#5-4-1-Olist-Plus订阅会员" class="headerlink" title="5.4.1 Olist Plus订阅会员"></a>5.4.1 Olist Plus订阅会员</h4><p><strong>方案</strong>：$9.9&#x2F;月订阅，享免运费+专属折扣+优先客服。</p>
+<p><strong>目标</strong>：10万订阅用户，稳定年收入$1,188万。</p>
+<h4 id="5-4-2-全国前置仓网络"><a href="#5-4-2-全国前置仓网络" class="headerlink" title="5.4.2 全国前置仓网络"></a>5.4.2 全国前置仓网络</h4><p><strong>方案</strong>：覆盖巴西Top10城市，80%订单3-5天送达。</p>
+<p><strong>目标</strong>：整体留存率达到15%行业均值。</p>
+<hr>
+<h2 id="七、技术实现附录"><a href="#七、技术实现附录" class="headerlink" title="七、技术实现附录"></a>七、技术实现附录</h2><h3 id="7-1-SQL核心查询"><a href="#7-1-SQL核心查询" class="headerlink" title="7.1 SQL核心查询"></a>7.1 SQL核心查询</h3><h4 id="RFM指标SQL实现"><a href="#RFM指标SQL实现" class="headerlink" title="RFM指标SQL实现"></a>RFM指标SQL实现</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">WITH</span> customer_orders <span class="keyword">AS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> </span><br><span class="line">        customer_unique_id,</span><br><span class="line">        <span class="built_in">MAX</span>(order_purchase_timestamp) <span class="keyword">as</span> last_order_date,</span><br><span class="line">        <span class="built_in">COUNT</span>(<span class="keyword">DISTINCT</span> order_id) <span class="keyword">as</span> order_count,</span><br><span class="line">        <span class="built_in">SUM</span>(payment_value) <span class="keyword">as</span> total_spent</span><br><span class="line">    <span class="keyword">FROM</span> orders o</span><br><span class="line">    <span class="keyword">JOIN</span> customers c <span class="keyword">ON</span> o.customer_id <span class="operator">=</span> c.customer_id</span><br><span class="line">    <span class="keyword">JOIN</span> payments p <span class="keyword">ON</span> o.order_id <span class="operator">=</span> p.order_id</span><br><span class="line">    <span class="keyword">WHERE</span> o.order_status <span class="operator">=</span> <span class="string">&#x27;delivered&#x27;</span></span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> customer_unique_id</span><br><span class="line">),</span><br><span class="line">rfm_calc <span class="keyword">AS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> </span><br><span class="line">        customer_unique_id,</span><br><span class="line">        DATEDIFF(<span class="string">&#x27;2018-10-18&#x27;</span>, last_order_date) <span class="keyword">as</span> recency,</span><br><span class="line">        order_count <span class="keyword">as</span> frequency,</span><br><span class="line">        total_spent <span class="keyword">as</span> monetary</span><br><span class="line">    <span class="keyword">FROM</span> customer_orders</span><br><span class="line">)</span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    customer_unique_id,</span><br><span class="line">    recency,</span><br><span class="line">    frequency,</span><br><span class="line">    monetary,</span><br><span class="line">    <span class="built_in">NTILE</span>(<span class="number">5</span>) <span class="keyword">OVER</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> recency <span class="keyword">DESC</span>) <span class="keyword">as</span> r_score,</span><br><span class="line">    <span class="built_in">NTILE</span>(<span class="number">5</span>) <span class="keyword">OVER</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> frequency) <span class="keyword">as</span> f_score,</span><br><span class="line">    <span class="built_in">NTILE</span>(<span class="number">5</span>) <span class="keyword">OVER</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> monetary) <span class="keyword">as</span> m_score</span><br><span class="line"><span class="keyword">FROM</span> rfm_calc;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Cohort留存率SQL实现"><a href="#Cohort留存率SQL实现" class="headerlink" title="Cohort留存率SQL实现"></a>Cohort留存率SQL实现</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">WITH</span> user_cohort <span class="keyword">AS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> </span><br><span class="line">        customer_unique_id,</span><br><span class="line">        DATE_FORMAT(<span class="built_in">MIN</span>(order_purchase_timestamp), <span class="string">&#x27;%Y-%m&#x27;</span>) <span class="keyword">as</span> cohort_month</span><br><span class="line">    <span class="keyword">FROM</span> orders</span><br><span class="line">    <span class="keyword">WHERE</span> order_status <span class="operator">=</span> <span class="string">&#x27;delivered&#x27;</span></span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> customer_unique_id</span><br><span class="line">),</span><br><span class="line">user_activity <span class="keyword">AS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> </span><br><span class="line">        c.customer_unique_id,</span><br><span class="line">        c.cohort_month,</span><br><span class="line">        DATE_FORMAT(o.order_purchase_timestamp, <span class="string">&#x27;%Y-%m&#x27;</span>) <span class="keyword">as</span> order_month,</span><br><span class="line">        PERIOD_DIFF(</span><br><span class="line">            DATE_FORMAT(o.order_purchase_timestamp, <span class="string">&#x27;%Y%m&#x27;</span>),</span><br><span class="line">            DATE_FORMAT(c.cohort_month, <span class="string">&#x27;%Y%m&#x27;</span>)</span><br><span class="line">        ) <span class="keyword">as</span> <span class="keyword">period</span></span><br><span class="line">    <span class="keyword">FROM</span> user_cohort c</span><br><span class="line">    <span class="keyword">JOIN</span> orders o <span class="keyword">ON</span> c.customer_unique_id <span class="operator">=</span> o.customer_id</span><br><span class="line">    <span class="keyword">WHERE</span> o.order_status <span class="operator">=</span> <span class="string">&#x27;delivered&#x27;</span></span><br><span class="line">),</span><br><span class="line">cohort_retention <span class="keyword">AS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> </span><br><span class="line">        cohort_month,</span><br><span class="line">        <span class="keyword">period</span>,</span><br><span class="line">        <span class="built_in">COUNT</span>(<span class="keyword">DISTINCT</span> customer_unique_id) <span class="keyword">as</span> active_users</span><br><span class="line">    <span class="keyword">FROM</span> user_activity</span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> cohort_month, <span class="keyword">period</span></span><br><span class="line">),</span><br><span class="line">cohort_size <span class="keyword">AS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> cohort_month, <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">as</span> total_users</span><br><span class="line">    <span class="keyword">FROM</span> user_cohort</span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> cohort_month</span><br><span class="line">)</span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    cr.cohort_month,</span><br><span class="line">    cr.period,</span><br><span class="line">    cr.active_users,</span><br><span class="line">    cs.total_users,</span><br><span class="line">    ROUND(cr.active_users <span class="operator">*</span> <span class="number">100.0</span> <span class="operator">/</span> cs.total_users, <span class="number">2</span>) <span class="keyword">as</span> retention_rate</span><br><span class="line"><span class="keyword">FROM</span> cohort_retention cr</span><br><span class="line"><span class="keyword">JOIN</span> cohort_size cs <span class="keyword">ON</span> cr.cohort_month <span class="operator">=</span> cs.cohort_month</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> cr.cohort_month, cr.period;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-Python代码结构"><a href="#7-2-Python代码结构" class="headerlink" title="7.2 Python代码结构"></a>7.2 Python代码结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">src/</span><br><span class="line">├── 01_data_exploration.py      # 数据探索</span><br><span class="line">├── 02_data_quality.py          # 质量检查</span><br><span class="line">├── 03_data_cleaning.py         # 清洗+特征工程</span><br><span class="line">├── 04_rfm_analysis.py          # RFM客户分层</span><br><span class="line">├── 05_cohort_analysis.py       # 留存分析</span><br><span class="line">├── 05_machine_learning.py      # 满意度+延迟预测</span><br><span class="line">└── generate_blog_charts.py     # 博客图表生成</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-可视化图表集"><a href="#7-3-可视化图表集" class="headerlink" title="7.3 可视化图表集"></a>7.3 可视化图表集</h3><table>
+<thead>
+<tr>
+<th>图表</th>
+<th>用途</th>
+<th>实现工具</th>
+<th>文件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据仪表板总览</td>
+<td>KPI卡片+趋势+分布</td>
+<td>Matplotlib subplot</td>
+<td>dashboard_overview.png</td>
+</tr>
+<tr>
+<td>Cohort留存率热力图</td>
+<td>展示各月新增用户的留存趋势</td>
+<td>Seaborn heatmap</td>
+<td>cohort_retention.png</td>
+</tr>
+<tr>
+<td>RFM六宫格分析</td>
+<td>客户分层全面可视化</td>
+<td>Matplotlib subplot</td>
+<td>rfm_analysis.png</td>
+</tr>
+<tr>
+<td>物流时效-留存率关联图</td>
+<td>验证物流对留存的影响</td>
+<td>Seaborn regplot</td>
+<td>delivery_vs_retention.png</td>
+</tr>
+<tr>
+<td>竞品对比雷达图</td>
+<td>多维度竞争力对比（颜色：Olist&#x3D;红&#x2F;Mercado&#x3D;蓝&#x2F;Amazon&#x3D;橙&#x2F;Shopee&#x3D;紫）</td>
+<td>Matplotlib polar</td>
+<td>competitive_radar.png</td>
+</tr>
+<tr>
+<td>客户旅程漏斗</td>
+<td>各阶段转化分析</td>
+<td>Matplotlib bar</td>
+<td>customer_funnel.png</td>
+</tr>
+<tr>
+<td>地理分布图</td>
+<td>各州客户分布与收入占比</td>
+<td>Matplotlib bar+pie</td>
+<td>geographic_distribution.png</td>
+</tr>
+</tbody></table>
+<h4 id="图表生成代码示例"><a href="#图表生成代码示例" class="headerlink" title="图表生成代码示例"></a>图表生成代码示例</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配送时效 vs 留存率关联分析</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> seaborn <span class="keyword">as</span> sns</span><br><span class="line"></span><br><span class="line">fig, (ax1, ax2) = plt.subplots(<span class="number">1</span>, <span class="number">2</span>, figsize=(<span class="number">16</span>, <span class="number">6</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 左图：留存率柱状图</span></span><br><span class="line">colors = [<span class="string">&#x27;#2ecc71&#x27;</span>, <span class="string">&#x27;#3498db&#x27;</span>, <span class="string">&#x27;#f39c12&#x27;</span>, <span class="string">&#x27;#e74c3c&#x27;</span>, <span class="string">&#x27;#9b59b6&#x27;</span>]</span><br><span class="line">retention_by_delivery = customer_stats.groupby(<span class="string">&#x27;delivery_bin&#x27;</span>)[<span class="string">&#x27;is_retained&#x27;</span>].mean() * <span class="number">100</span></span><br><span class="line">bars = ax1.bar(retention_by_delivery.index, retention_by_delivery.values, color=colors)</span><br><span class="line">ax1.set_title(<span class="string">&#x27;配送时效 vs 客户留存率&#x27;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 右图：散点图带趋势线</span></span><br><span class="line">scatter = ax2.scatter(customer_stats[<span class="string">&#x27;first_delivery_days&#x27;</span>], </span><br><span class="line">                      customer_stats[<span class="string">&#x27;is_retained&#x27;</span>], alpha=<span class="number">0.1</span>)</span><br><span class="line">z = np.polyfit(customer_stats[<span class="string">&#x27;first_delivery_days&#x27;</span>], </span><br><span class="line">               customer_stats[<span class="string">&#x27;is_retained&#x27;</span>], <span class="number">2</span>)</span><br><span class="line">p = np.poly1d(z)</span><br><span class="line">ax2.plot(x_line, p(x_line), <span class="string">&quot;r--&quot;</span>, linewidth=<span class="number">2</span>, label=<span class="string">&#x27;Trend&#x27;</span>)</span><br><span class="line">ax2.set_title(<span class="string">&#x27;配送时效与留存关系散点图&#x27;</span>, fontsize=<span class="number">14</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 竞品雷达图 - 使用明显区分的颜色</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">fig, ax = plt.subplots(figsize=(<span class="number">10</span>, <span class="number">10</span>), subplot_kw=<span class="built_in">dict</span>(projection=<span class="string">&#x27;polar&#x27;</span>))</span><br><span class="line"></span><br><span class="line">categories = [<span class="string">&#x27;物流时效&#x27;</span>, <span class="string">&#x27;客户留存&#x27;</span>, <span class="string">&#x27;SKU丰富度&#x27;</span>, <span class="string">&#x27;价格竞争力&#x27;</span>, <span class="string">&#x27;移动端体验&#x27;</span>, <span class="string">&#x27;会员体系&#x27;</span>]</span><br><span class="line">olist_scores = [<span class="number">4</span>, <span class="number">3</span>, <span class="number">7</span>, <span class="number">6</span>, <span class="number">5</span>, <span class="number">2</span>]      <span class="comment"># Olist - 深红色</span></span><br><span class="line">mercado_scores = [<span class="number">7</span>, <span class="number">7</span>, <span class="number">9</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">6</span>]   <span class="comment"># Mercado Libre - 蓝色  </span></span><br><span class="line">amazon_scores = [<span class="number">9</span>, <span class="number">8</span>, <span class="number">8</span>, <span class="number">7</span>, <span class="number">9</span>, <span class="number">7</span>]    <span class="comment"># Amazon Brazil - 橙色</span></span><br><span class="line">shopee_scores = [<span class="number">6</span>, <span class="number">9</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">9</span>, <span class="number">8</span>]    <span class="comment"># Shopee - 紫色（与Olist红色明显区分）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 颜色设置确保各平台清晰可辨</span></span><br><span class="line">colors = [<span class="string">&#x27;#c0392b&#x27;</span>, <span class="string">&#x27;#2980b9&#x27;</span>, <span class="string">&#x27;#e67e22&#x27;</span>, <span class="string">&#x27;#8e44ad&#x27;</span>]  <span class="comment"># 红、蓝、橙、紫</span></span><br><span class="line"></span><br><span class="line">angles = np.linspace(<span class="number">0</span>, <span class="number">2</span> * np.pi, <span class="built_in">len</span>(categories), endpoint=<span class="literal">False</span>).tolist()</span><br><span class="line">angles += angles[:<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> scores, label, color <span class="keyword">in</span> <span class="built_in">zip</span>([olist_scores, mercado_scores, amazon_scores, shopee_scores], </span><br><span class="line">                                [<span class="string">&#x27;Olist&#x27;</span>, <span class="string">&#x27;Mercado Libre&#x27;</span>, <span class="string">&#x27;Amazon Brazil&#x27;</span>, <span class="string">&#x27;Shopee&#x27;</span>], </span><br><span class="line">                                colors):</span><br><span class="line">    scores_plot = scores + scores[:<span class="number">1</span>]</span><br><span class="line">    ax.plot(angles, scores_plot, <span class="string">&#x27;o-&#x27;</span>, linewidth=<span class="number">2</span>, label=label, color=color)</span><br><span class="line">    ax.fill(angles, scores_plot, alpha=<span class="number">0.15</span>, color=color)</span><br><span class="line"></span><br><span class="line">ax.set_xticks(angles[:-<span class="number">1</span>])</span><br><span class="line">ax.set_xticklabels(categories)</span><br><span class="line">ax.legend(loc=<span class="string">&#x27;upper right&#x27;</span>, bbox_to_anchor=(<span class="number">1.3</span>, <span class="number">1.1</span>))</span><br><span class="line">plt.title(<span class="string">&#x27;巴西电商平台竞争力对比&#x27;</span>, fontsize=<span class="number">14</span>)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="七、复盘与展望"><a href="#七、复盘与展望" class="headerlink" title="七、复盘与展望"></a>七、复盘与展望</h2><h3 id="7-1-核心洞察总结"><a href="#7-1-核心洞察总结" class="headerlink" title="7.1 核心洞察总结"></a>7.1 核心洞察总结</h3><ol>
+<li><strong>物流体验是核心瓶颈</strong>：配送相关特征占满意度预测82.7%，平均12天配送远超行业标准</li>
+<li><strong>运营体系缺失</strong>：无会员体系、无分层运营，97%用户仅购买一次</li>
+<li><strong>平台模式结构性缺陷</strong>：第三方模式导致商家-用户关系割裂，数据掌控权分散</li>
+</ol>
+<h3 id="7-2-差异化亮点"><a href="#7-2-差异化亮点" class="headerlink" title="7.2 差异化亮点"></a>7.2 差异化亮点</h3><ol>
+<li><strong>从数据异常到商业模式反思</strong>：不止于”留存率低”的现象描述，深入平台模式结构性困境</li>
+<li><strong>跨行业经验迁移</strong>：引入Shopee VIP、云拿无人店、D2C模式等跨行业案例</li>
+<li><strong>可量化业务影响</strong>：每项建议附财务测算（ROI、LTV增量、GMV影响）</li>
+<li><strong>完整可视化呈现</strong>：6类专业图表，从宏观仪表板到微观散点关系图</li>
+</ol>
+<h3 id="7-3-数据时效性与模型漂移风险提示"><a href="#7-3-数据时效性与模型漂移风险提示" class="headerlink" title="7.3 数据时效性与模型漂移风险提示"></a>7.3 数据时效性与模型漂移风险提示</h3><blockquote>
+<p>⚠️ <strong>数据时效性声明</strong>：本分析基于Olist 2016-2018年数据集，截至2026年存在8-10年时间gap。以下因素可能导致分析结论与实际业务存在偏差：</p>
+<ul>
+<li>业务模式演变：Olist可能在2018年后调整了运营策略</li>
+<li>市场竞争格局：Mercado Libre、Amazon Brazil、Shopee的市场份额变化</li>
+<li>宏观经济周期：巴西雷亚尔汇率波动、通胀率变化、消费信心指数</li>
+<li>数据基础设施： tracking能力、数据完整性可能已升级</li>
+</ul>
+</blockquote>
+<p><strong>建议</strong>：基于2024-2025年最新数据验证核心结论（留存率、配送时效、客户分层结构）。</p>
+<h3 id="7-4-机器学习模型漂移风险"><a href="#7-4-机器学习模型漂移风险" class="headerlink" title="7.4 机器学习模型漂移风险"></a>7.4 机器学习模型漂移风险</h3><p><strong>概念漂移（Concept Drift）</strong>：</p>
+<ul>
+<li>特征与目标变量关系可能变化（如配送时效对满意度的影响程度）</li>
+<li>客户行为模式演变（如对会员权益的敏感度）</li>
+</ul>
+<p><strong>数据漂移（Data Drift）</strong>：</p>
+<ul>
+<li>特征分布变化（如平均订单金额、品类偏好）</li>
+<li>新支付方式出现（如Pix即时支付在巴西的普及）</li>
+</ul>
+<p><strong>监控机制建议</strong>：</p>
+<ol>
+<li><strong>性能监控</strong>：每月计算模型AUC，设定衰减阈值（如AUC下降&gt;0.05触发再训练）</li>
+<li><strong>特征监控</strong>：追踪关键特征分布（ PSI - Population Stability Index）</li>
+<li><strong>AB测试对比</strong>：新旧模型并行运行，逐步切换流量</li>
+</ol>
+<h3 id="7-5-待优化方向"><a href="#7-5-待优化方向" class="headerlink" title="7.5 待优化方向"></a>7.5 待优化方向</h3><ol>
+<li><strong>NLP情感分析</strong>：reviews评论文本挖掘，提取具体痛点</li>
+<li><strong>时间序列预测</strong>：Prophet做销量预测，识别季节性趋势</li>
+<li><strong>A&#x2F;B实验实施</strong>：将本报告设计的实验框架实际落地验证</li>
+</ol>
+<hr>
+<p><strong>GitHub仓库</strong>：<a target="_blank" rel="noopener" href="https://github.com/zoengsang/olist-ecommerce-analysis">github.com&#x2F;zoengsang&#x2F;olist-ecommerce-analysis</a><br><strong>技术栈</strong>：MySQL, Pandas, Matplotlib, Seaborn, Scikit-learn, XGBoost<br><strong>数据集</strong>：Olist巴西电商公开数据集（10万+订单）</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://zoengsang.cloud">zoengkei</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://zoengsang.cloud/2026/03/15/olist-ecommerce-analysis-complete-guide/">https://zoengsang.cloud/2026/03/15/olist-ecommerce-analysis-complete-guide/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://zoengsang.cloud" target="_blank">zoengkei_blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Python/">Python</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a><a class="post-meta__tags" href="/tags/RFM%E6%A8%A1%E5%9E%8B/">RFM模型</a><a class="post-meta__tags" href="/tags/Cohort%E5%88%86%E6%9E%90/">Cohort分析</a><a class="post-meta__tags" href="/tags/%E7%94%A8%E6%88%B7%E7%95%99%E5%AD%98/">用户留存</a></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/03/15/olist-complete-guide/" title="Olist巴西电商数据分析完整实战指南（从SQL到RFM模型）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Olist巴西电商数据分析完整实战指南（从SQL到RFM模型）</div></div><div class="info-2"><div class="info-item-1"> 配套在线SQL练习平台：https://zoengsang.cloud/sql-practice/app/  项目简介什么是Olist？Olist 是巴西最大的电商平台之一，成立于2015年。它连接了巴西各地的小型零售商，让商家可以通过Olist的平台将商品销售给全国客户，并使用Olist的物流网络完成配送。 为什么选这个项目？  真实电商数据，包含订单、客户、商品、支付等完整业务链条 数据量适中（10万订单），适合个人电脑处理 涵盖数据分析核心技能：SQL、Python、可视化、机器学习 面试时展示RFM和Cohort分析是加分项   一、数据集详解1.1 数据表关系Olist数据集包含9个关联表，核心关系如下： 1234567891011121314151617                ┌─────────────┐                │   orders    │  ← 订单主表（核心）                │  (99,441)   │                └──────┬──────┘       ┌─────────────┼─...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/03/15/olist-complete-guide/" title="Olist巴西电商数据分析完整实战指南（从SQL到RFM模型）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-15</div><div class="info-item-2">Olist巴西电商数据分析完整实战指南（从SQL到RFM模型）</div></div><div class="info-2"><div class="info-item-1"> 配套在线SQL练习平台：https://zoengsang.cloud/sql-practice/app/  项目简介什么是Olist？Olist 是巴西最大的电商平台之一，成立于2015年。它连接了巴西各地的小型零售商，让商家可以通过Olist的平台将商品销售给全国客户，并使用Olist的物流网络完成配送。 为什么选这个项目？  真实电商数据，包含订单、客户、商品、支付等完整业务链条 数据量适中（10万订单），适合个人电脑处理 涵盖数据分析核心技能：SQL、Python、可视化、机器学习 面试时展示RFM和Cohort分析是加分项   一、数据集详解1.1 数据表关系Olist数据集包含9个关联表，核心关系如下： 1234567891011121314151617                ┌─────────────┐                │   orders    │  ← 订单主表（核心）                │  (99,441)   │                └──────┬──────┘       ┌─────────────┼─...</div></div></div></a><a class="pagination-related" href="/2026/03/03/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E6%B1%82%E8%81%8C%E6%8C%87%E5%8D%97-%E6%89%93%E9%80%A0%E6%8A%80%E6%9C%AF%E5%8D%9A%E5%AE%A2%E4%BD%9C%E5%93%81%E9%9B%86/" title="数据分析求职指南：打造技术博客作品集"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-03</div><div class="info-item-2">数据分析求职指南：打造技术博客作品集</div></div><div class="info-2"><div class="info-item-1">📊 为什么需要技术博客？在数据分析求职竞争中，一个优质的技术博客可以：  展示实际能力 - 纸上谈兵不如一行代码 证明学习热情 - 持续更新体现专业热情 建立专业形象 - 从求职者转型为领域贡献者 提供可验证成果 - 招聘方可以直接查看你的工作质量  🚀 数据分析博客内容规划1. 技术教程与案例 Python数据处理实战（Pandas、NumPy） SQL优化与复杂查询 数据可视化案例（Matplotlib、Seaborn、Plotly） 机器学习模型应用（Scikit-learn）  2. 项目深度解析 完整项目架构说明 技术选型与决策过程 遇到的问题与解决方案 性能优化与部署经验  3. 行业洞察 数据分析方法论 业务场景应用 工具链对比与选型 最佳实践总结  🎯 我的数据分析技能栈数据处理 Python: Pandas数据清洗、NumPy数值计算 SQL: 复杂查询优化、性能调优、数据建模 ETL: 数据管道设计、自动化流程  分析与建模 统计分析: 描述性统计、假设检验、回归分析 机器学习: 分类、回归、聚类、特征工程 时间序列: 预测模型、季节性分析  可视化与报...</div></div></div></a><a class="pagination-related" href="/2026/03/03/%E7%94%B5%E5%95%86%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E5%88%86%E6%9E%90-%E4%BB%8E%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97%E5%88%B0%E5%8F%AF%E8%A7%86%E5%8C%96%E6%B4%9E%E5%AF%9F/" title="电商用户行为分析：从数据清洗到可视化洞察"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-03</div><div class="info-item-2">电商用户行为分析：从数据清洗到可视化洞察</div></div><div class="info-2"><div class="info-item-1">🎯 项目概述本项目通过模拟电商平台用户行为数据，完整演示数据分析的标准化流程：数据清洗 → 探索性分析 → 可视化 → 机器学习应用 → 业务洞察。重点关注数据处理技巧和可视化表达，附带基础的机器学习分群应用。 业务目标 用户行为理解：识别用户活跃模式、购买偏好、消费能力 用户分群：基于行为特征对用户进行聚类，实现精细化运营 业务优化：基于数据洞察提出可落地的运营策略  技术栈 数据处理：Pandas, NumPy 可视化：Matplotlib, Seaborn, Plotly 机器学习：Scikit-learn (KMeans聚类) 开发环境：Jupyter Notebook, Python 3.11  📊 数据集介绍数据来源使用模拟的电商平台数据，包含以下维度： 1234567891011121314151617181920212223242526import pandas as pdimport numpy as npfrom datetime import datetime, timedelta# 生成模拟数据np.random.seed(42)n_users = 1...</div></div></div></a><a class="pagination-related" href="/2026/03/15/Olist-Store%E7%94%B5%E5%95%86%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%AE%8C%E6%95%B4%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/" title="Olist Store电商数据分析完整实践指南"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-15</div><div class="info-item-2">Olist Store电商数据分析完整实践指南</div></div><div class="info-2"><div class="info-item-1"> 项目概览这是一个中级电商数据分析完整实践指南，基于Kaggle与天池双平台的Olist巴西电商数据集，帮助你构建从数据清洗到机器学习建模的全流程能力体系。 核心数据指标   指标 数值    关联数据表 9个   数据总量 123MB   订单记录 ~10万   时间跨度 2016-2018   客户满意度 76%   完整学习周期 14-18天   核心分析维度 6大维度   技术栈 数据处理: Python + Pandas + NumPy 数据库: SQL + MySQL 可视化: Matplotlib + Plotly + Streamlit 机器学习: Scikit-learn + XGBoost 平台: Kaggle + 天池   核心推荐项目Kaggle平台优势特点:  🏆 完整数据集: 9个关联CSV文件，星型schema架构 💻 Python生态: Notebook共享、Kaggle API、竞赛技巧 🌍 国际认可: 外企、国际化团队高度认可  天池平台优势特点:  🇨🇳 中文环境: 完整中文文档、字段注释、入门教程 🖥️ SQL专项: 在线Not...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/xiaoxin.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/ loading='lazy'></div><div class="author-info-name">zoengkei</div><div class="author-info-description">数据分析师 | 量化研究员</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/nidenuoyan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/nidenuoyan" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:z1254611476@163.com" target="_blank" title="邮箱"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到 zoengkei 的技术博客，这里记录数据分析、量化研究的学习与实践</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89%E4%B8%8E%E5%88%86%E6%9E%90%E6%A1%86%E6%9E%B6"><span class="toc-number">1.</span> <span class="toc-text">一、问题定义与分析框架</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%EF%BC%9A%E7%95%99%E5%AD%98%E7%8E%87%E5%8D%B1%E6%9C%BA%E7%9A%84%E4%B8%A5%E5%B3%BB%E7%8E%B0%E5%AE%9E"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 核心问题：留存率危机的严峻现实</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%81%87%E8%AE%BE%E6%A0%91%E6%9E%84%E5%BB%BA%EF%BC%9A%E7%95%99%E5%AD%98%E7%8E%87%E7%9A%84%E7%B3%BB%E7%BB%9F%E6%80%A7%E6%8B%86%E8%A7%A3"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 假设树构建：留存率的系统性拆解</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E6%8E%A2%E7%B4%A2%E4%B8%8E%E8%B4%A8%E9%87%8F%E9%AA%8C%E8%AF%81"><span class="toc-number">2.</span> <span class="toc-text">二、数据探索与质量验证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%95%B0%E6%8D%AE%E9%9B%86%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 数据集结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%95%B0%E6%8D%AE%E8%B4%A8%E9%87%8F%E6%A3%80%E9%AA%8C"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 数据质量检验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%9C%B0%E7%90%86%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90%EF%BC%9A%E6%9E%81%E5%BA%A6%E9%9B%86%E4%B8%AD%E7%9A%84%E5%B8%82%E5%9C%BA%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 地理分布分析：极度集中的市场结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%81%87%E8%AE%BE%E9%AA%8C%E8%AF%81%EF%BC%9A%E7%95%99%E5%AD%98%E7%8E%87%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90"><span class="toc-number">3.</span> <span class="toc-text">三、假设验证：留存率根因分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%81%87%E8%AE%BE1%E9%AA%8C%E8%AF%81%EF%BC%9A%E8%8E%B7%E5%AE%A2%E8%B4%A8%E9%87%8F%E9%97%AE%E9%A2%98"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 假设1验证：获客质量问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%81%87%E8%AE%BE2%E9%AA%8C%E8%AF%81%EF%BC%9A%E4%BA%A7%E5%93%81%E4%BD%93%E9%AA%8C%E7%BC%BA%E9%99%B7%E2%80%94%E2%80%94%E7%89%A9%E6%B5%81%E6%98%AF%E6%A0%B8%E5%BF%83%E7%93%B6%E9%A2%88"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 假设2验证：产品体验缺陷——物流是核心瓶颈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%81%87%E8%AE%BE3%E9%AA%8C%E8%AF%81%EF%BC%9A%E7%AB%9E%E4%BA%89%E6%9B%BF%E4%BB%A3%E6%95%88%E5%BA%94"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 假设3验证：竞争替代效应</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E5%81%87%E8%AE%BE4%E9%AA%8C%E8%AF%81%EF%BC%9A%E8%BF%90%E8%90%A5%E4%BD%93%E7%B3%BB%E7%BC%BA%E5%A4%B1%E2%80%94%E2%80%94RFM%E4%B8%8ECohort%E5%88%86%E6%9E%90"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 假设4验证：运营体系缺失——RFM与Cohort分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-4-1-RFM%E5%AE%A2%E6%88%B7%E4%BB%B7%E5%80%BC%E5%88%86%E5%B1%82"><span class="toc-number">3.4.1.</span> <span class="toc-text">3.4.1 RFM客户价值分层</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-4-2-Cohort%E7%95%99%E5%AD%98%E5%88%86%E6%9E%90"><span class="toc-number">3.4.2.</span> <span class="toc-text">3.4.2 Cohort留存分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E5%81%87%E8%AE%BE5%E9%AA%8C%E8%AF%81%EF%BC%9A%E5%B9%B3%E5%8F%B0%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84%E6%80%A7%E7%BC%BA%E9%99%B7"><span class="toc-number">3.5.</span> <span class="toc-text">3.5 假设5验证：平台模式结构性缺陷</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%9A%E6%BB%A1%E6%84%8F%E5%BA%A6%E9%A2%84%E6%B5%8B%E9%AA%8C%E8%AF%81%E7%89%A9%E6%B5%81%E5%81%87%E8%AE%BE"><span class="toc-number">4.</span> <span class="toc-text">四、机器学习：满意度预测验证物流假设</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%A8%A1%E5%9E%8B%E6%9E%84%E5%BB%BA"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 模型构建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E7%89%B9%E5%BE%81%E9%87%8D%E8%A6%81%E6%80%A7%E5%88%86%E6%9E%90"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 特征重要性分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81AB%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%EF%BC%9A%E4%BB%8E%E5%81%87%E8%AE%BE%E9%AA%8C%E8%AF%81%E5%88%B0%E5%9B%A0%E6%9E%9C%E6%8E%A8%E6%96%AD"><span class="toc-number">5.</span> <span class="toc-text">五、AB测试框架：从假设验证到因果推断</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-AB%E6%B5%8B%E8%AF%95%E5%BF%85%E8%A6%81%E6%80%A7%E8%AF%84%E4%BC%B0"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 AB测试必要性评估</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%AE%9E%E9%AA%8C%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 实验设计规范</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-1-%E5%BB%B6%E8%BF%9F%E9%A2%84%E8%AD%A6%E6%96%B9%E6%A1%88AB%E6%B5%8B%E8%AF%95%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.2.1.</span> <span class="toc-text">5.2.1 延迟预警方案AB测试设计</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-2-%E5%AE%A2%E6%88%B7%E6%8C%BD%E5%9B%9ECampaign%E5%A4%9A%E7%BB%84%E6%B5%8B%E8%AF%95"><span class="toc-number">5.2.2.</span> <span class="toc-text">5.2.2 客户挽回Campaign多组测试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-3-%E5%8C%BA%E5%9F%9F%E7%BA%A7%E7%89%A9%E6%B5%81%E8%AF%95%E7%82%B9%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.2.3.</span> <span class="toc-text">5.2.3 区域级物流试点设计</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E8%A7%A3%E8%AF%BB%E4%B8%8E%E5%86%B3%E7%AD%96%E8%A7%84%E5%88%99"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 实验结果解读与决策规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E4%B8%9A%E5%8A%A1%E8%90%BD%E5%9C%B0%E6%96%B9%E6%A1%88%EF%BC%9A%E4%BB%8E%E6%B4%9E%E5%AF%9F%E5%88%B0%E8%A1%8C%E5%8A%A8"><span class="toc-number">6.</span> <span class="toc-text">六、业务落地方案：从洞察到行动</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%A0%B9%E5%9B%A0%E6%B1%87%E6%80%BB%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E6%8E%92%E5%BA%8F"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 根因汇总与优先级排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E7%9F%AD%E6%9C%9F%E6%96%B9%E6%A1%88%EF%BC%880-3%E4%B8%AA%E6%9C%88%EF%BC%8CQuick-Wins%EF%BC%89"><span class="toc-number">6.2.</span> <span class="toc-text">5.2 短期方案（0-3个月，Quick Wins）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-1-%E5%BB%B6%E8%BF%9F%E8%AE%A2%E5%8D%95%E4%B8%BB%E5%8A%A8%E9%A2%84%E8%AD%A6"><span class="toc-number">6.2.1.</span> <span class="toc-text">5.2.1 延迟订单主动预警</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-2-At-Risk%E5%AE%A2%E6%88%B7%E6%8C%BD%E5%9B%9ECampaign"><span class="toc-number">6.2.2.</span> <span class="toc-text">5.2.2 At Risk客户挽回Campaign</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E4%B8%AD%E6%9C%9F%E6%96%B9%E6%A1%88%EF%BC%883-6%E4%B8%AA%E6%9C%88%EF%BC%8C%E4%BD%93%E7%B3%BB%E5%BB%BA%E8%AE%BE%EF%BC%89"><span class="toc-number">6.3.</span> <span class="toc-text">5.3 中期方案（3-6个月，体系建设）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-1-%E4%BC%9A%E5%91%98%E4%BD%93%E7%B3%BB%E6%90%AD%E5%BB%BA"><span class="toc-number">6.3.1.</span> <span class="toc-text">5.3.1 会员体系搭建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-2-%E5%89%8D%E7%BD%AE%E4%BB%93%E8%AF%95%E7%82%B9"><span class="toc-number">6.3.2.</span> <span class="toc-text">5.3.2 前置仓试点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E9%95%BF%E6%9C%9F%E6%96%B9%E6%A1%88%EF%BC%886-12%E4%B8%AA%E6%9C%88%EF%BC%8C%E6%88%98%E7%95%A5%E5%8D%87%E7%BA%A7%EF%BC%89"><span class="toc-number">6.4.</span> <span class="toc-text">5.4 长期方案（6-12个月，战略升级）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-4-1-Olist-Plus%E8%AE%A2%E9%98%85%E4%BC%9A%E5%91%98"><span class="toc-number">6.4.1.</span> <span class="toc-text">5.4.1 Olist Plus订阅会员</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-4-2-%E5%85%A8%E5%9B%BD%E5%89%8D%E7%BD%AE%E4%BB%93%E7%BD%91%E7%BB%9C"><span class="toc-number">6.4.2.</span> <span class="toc-text">5.4.2 全国前置仓网络</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%8A%80%E6%9C%AF%E5%AE%9E%E7%8E%B0%E9%99%84%E5%BD%95"><span class="toc-number">7.</span> <span class="toc-text">七、技术实现附录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-SQL%E6%A0%B8%E5%BF%83%E6%9F%A5%E8%AF%A2"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 SQL核心查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#RFM%E6%8C%87%E6%A0%87SQL%E5%AE%9E%E7%8E%B0"><span class="toc-number">7.1.1.</span> <span class="toc-text">RFM指标SQL实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Cohort%E7%95%99%E5%AD%98%E7%8E%87SQL%E5%AE%9E%E7%8E%B0"><span class="toc-number">7.1.2.</span> <span class="toc-text">Cohort留存率SQL实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-Python%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 Python代码结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E5%8F%AF%E8%A7%86%E5%8C%96%E5%9B%BE%E8%A1%A8%E9%9B%86"><span class="toc-number">7.3.</span> <span class="toc-text">7.3 可视化图表集</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%BE%E8%A1%A8%E7%94%9F%E6%88%90%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="toc-number">7.3.1.</span> <span class="toc-text">图表生成代码示例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%A4%8D%E7%9B%98%E4%B8%8E%E5%B1%95%E6%9C%9B"><span class="toc-number">8.</span> <span class="toc-text">七、复盘与展望</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E6%A0%B8%E5%BF%83%E6%B4%9E%E5%AF%9F%E6%80%BB%E7%BB%93"><span class="toc-number">8.1.</span> <span class="toc-text">7.1 核心洞察总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E5%B7%AE%E5%BC%82%E5%8C%96%E4%BA%AE%E7%82%B9"><span class="toc-number">8.2.</span> <span class="toc-text">7.2 差异化亮点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E6%95%B0%E6%8D%AE%E6%97%B6%E6%95%88%E6%80%A7%E4%B8%8E%E6%A8%A1%E5%9E%8B%E6%BC%82%E7%A7%BB%E9%A3%8E%E9%99%A9%E6%8F%90%E7%A4%BA"><span class="toc-number">8.3.</span> <span class="toc-text">7.3 数据时效性与模型漂移风险提示</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E6%BC%82%E7%A7%BB%E9%A3%8E%E9%99%A9"><span class="toc-number">8.4.</span> <span class="toc-text">7.4 机器学习模型漂移风险</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-%E5%BE%85%E4%BC%98%E5%8C%96%E6%96%B9%E5%90%91"><span class="toc-number">8.5.</span> <span class="toc-text">7.5 待优化方向</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/15/olist-ecommerce-analysis-complete-guide/" title="Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析">Olist留存率为何仅0.3%？——从数据异常到商业模式反思的完整分析</a><time datetime="2026-03-15T15:30:00.000Z" title="发表于 2026-03-15 23:30:00">2026-03-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/15/olist-complete-guide/" title="Olist巴西电商数据分析完整实战指南（从SQL到RFM模型）">Olist巴西电商数据分析完整实战指南（从SQL到RFM模型）</a><time datetime="2026-03-15T14:30:00.000Z" title="发表于 2026-03-15 22:30:00">2026-03-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/03/15/Olist-%E7%94%B5%E5%95%86%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90-RFM%E4%B8%8ECohort%E5%AE%9E%E6%88%98/" title="Olist电商数据分析实战：RFM客户价值与Cohort留存深度解析（Python完整代码）"><img src="https://kimi-web-img.moonshot.cn/img/www.dny1.com/942c7e620a40de87f2b769cd90fd34b6fd410f1a.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Olist电商数据分析实战：RFM客户价值与Cohort留存深度解析（Python完整代码）"/ loading='lazy'></a><div class="content"><a class="title" href="/2026/03/15/Olist-%E7%94%B5%E5%95%86%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90-RFM%E4%B8%8ECohort%E5%AE%9E%E6%88%98/" title="Olist电商数据分析实战：RFM客户价值与Cohort留存深度解析（Python完整代码）">Olist电商数据分析实战：RFM客户价值与Cohort留存深度解析（Python完整代码）</a><time datetime="2026-03-15T13:00:00.000Z" title="发表于 2026-03-15 21:00:00">2026-03-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/15/Olist-Store%E7%94%B5%E5%95%86%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%AE%8C%E6%95%B4%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/" title="Olist Store电商数据分析完整实践指南">Olist Store电商数据分析完整实践指南</a><time datetime="2026-03-15T09:30:00.000Z" title="发表于 2026-03-15 17:30:00">2026-03-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/04/python%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E4%B8%8E%E6%8C%96%E6%8E%98%E5%AE%9E%E6%88%98/" title="MySQL数据分析：日常工作中的SQL查询">MySQL数据分析：日常工作中的SQL查询</a><time datetime="2026-03-04T02:45:00.000Z" title="发表于 2026-03-04 10:45:00">2026-03-04</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By zoengkei</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.2</a><br>
+<img src="https://img2023.cnblogs.com/blog/2233039/202405/2233039-20240526105735195-780051803.png" style="vertical-align: middle;" height="20px" loading='lazy'>
+<a href="http://beian.miit.gov.cn/"  style="color:#f72b07" target="_blank">粤ICP备2025489933号-1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.2"></script><script src="/js/main.js?v=5.5.2"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'nidenuoyan/nidenuoyan.github.io',
+      'data-repo-id': 'R_kgDOQSBwLQ',
+      'data-category-id': 'DIC_kwDOQSBwLc4C3pu3',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !true) {
+    if (true) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="/"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.2"></script></div></div></body></html>
