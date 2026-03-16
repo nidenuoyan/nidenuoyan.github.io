@@ -1,49 +1,124 @@
-/* Power BI图表响应式容器（优化后） */
-.powerbi-responsive {
-  position: relative;
+/* 自定义样式优化 */
+
+/* 深色模式适配 */
+[data-theme="dark"] {
+  --card-bg: #1a1a2e;
+  --text-color: #e4e4e4;
+}
+
+/* 项目卡片样式 */
+.project-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+/* 关键指标高亮 */
+.highlight-stat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 2px;
+}
+
+/* 技能标签 */
+.skill-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85em;
+  margin: 3px;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.skill-tag:hover {
+  background: #1976d2;
+  color: white;
+}
+
+/* 表格样式优化 */
+.table-wrapper {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+table {
   width: 100%;
-  max-width: 1400px; /* 宽屏显示更宽 */
-  margin: 30px auto; /* 上下留空更多 */
-  padding-bottom: 65%; /* 高度增加，面积变大（65%≈1.54:1） */
-  height: 0;
-  overflow: hidden;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f6f8fa;
+  font-weight: 600;
+}
+
+th, td {
+  padding: 12px;
+  border: 1px solid #e1e4e8;
+  text-align: left;
+}
+
+tr:nth-child(even) {
+  background: #f6f8fa;
+}
+
+/* 引用块样式 */
+blockquote {
+  border-left: 4px solid #0366d6;
+  background: #f1f8ff;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 8px 8px 0;
+}
+
+/* 图片懒加载占位 */
+img[loading="lazy"] {
+  background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+  background-size: 200% 100%;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .project-card {
+    padding: 1rem;
+  }
+  
+  .highlight-stat {
+    font-size: 0.9em;
+  }
+}
+
+/* 代码块优化 */
+figure.highlight {
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
-.powerbi-responsive iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
+
+.highlight .gutter {
+  background: #f6f8fa;
+  border-right: 1px solid #e1e4e8;
 }
-.powerbi-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+
+/* 文章元信息样式 */
+.post-meta {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 14px;
-  background-color: #f9f9f9;
 }
 
-/* 覆盖主题内容区宽度限制（按需添加） */
-#content-inner, .container {
-  max-width: 1400px !important;
-}
-
-/* 终极适配 hljs 的代码块样式（优先级最高，必生效） */
-.highlight,
-.highlight pre,
-.highlight pre code,
-.post-content .highlight pre,
-.post-content .highlight pre code {
-  font-size: 20px !important; /* 先设20px，肉眼能明显看到变化 */
-  font-family: Consolas, "Microsoft YaHei", monospace !important;
-  line-height: 1.8 !important;
+.post-meta .skill-tag {
+  font-size: 0.75em;
+  padding: 2px 8px;
 }
