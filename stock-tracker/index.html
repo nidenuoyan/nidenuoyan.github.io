@@ -508,41 +508,66 @@
         loadMarketIndices();
     });
 
+    // 备用静态数据
+    const staticMarketData = [
+        {symbol: "SPY", name: "标普500", price: 580.50, change: 1.25, change_percent: 0.22},
+        {symbol: "QQQ", name: "纳斯达克100", price: 505.20, change: 2.80, change_percent: 0.56},
+        {symbol: "DIA", name: "道琼斯工业", price: 430.15, change: 0.75, change_percent: 0.17},
+        {symbol: "IWM", name: "罗素2000", price: 226.80, change: -0.45, change_percent: -0.20},
+        {symbol: "VIX", name: "波动率指数", price: 13.50, change: -0.25, change_percent: -1.82}
+    ];
+    
     // 加载市场指数
     async function loadMarketIndices() {
         try {
-            const response = await fetch(`${API_BASE}/api/stock/markets`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超时
+            
+            const response = await fetch(`${API_BASE}/api/stock/markets`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
             const result = await response.json();
             
-            if (result.success) {
-                const container = document.getElementById('marketIndices');
-                let html = '';
-                
-                result.data.forEach(index => {
-                    const changeClass = index.change >= 0 ? 'change-up' : 'change-down';
-                    const changeSign = index.change >= 0 ? '+' : '';
-                    
-                    html += `
-                        <div class="index-card" onclick="loadStock('${index.symbol}')" style="cursor:pointer;">
-                            <div class="index-name">${index.name}</div>
-                            <div class="index-price">${index.price.toLocaleString()}</div>
-                            <div class="index-change ${changeClass}">
-                                ${changeSign}${index.change} (${changeSign}${index.change_percent}%)
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                container.innerHTML = html;
+            if (result.success && result.data && result.data.length > 0) {
+                displayMarketData(result.data, result.source === 'static');
+            } else {
+                // 使用备用数据
+                displayMarketData(staticMarketData, true);
             }
         } catch (error) {
             console.error('获取市场指数失败:', error);
-            document.getElementById('marketIndices').innerHTML = `
-                <div class="error-message" style="grid-column: 1/-1;">
-                    获取市场数据失败，请检查网络连接
+            // 使用备用静态数据
+            displayMarketData(staticMarketData, true);
+        }
+    }
+    
+    // 显示市场数据
+    function displayMarketData(data, isStatic = false) {
+        const container = document.getElementById('marketIndices');
+        let html = '';
+        
+        if (isStatic) {
+            html += `<div style="grid-column: 1/-1; text-align: center; color: #888; font-size: 12px; margin-bottom: 10px;">当前显示参考数据，点击卡片查询实时价格</div>`;
+        }
+        
+        data.forEach(index => {
+            const changeClass = index.change >= 0 ? 'change-up' : 'change-down';
+            const changeSign = index.change >= 0 ? '+' : '';
+            
+            html += `
+                <div class="index-card" onclick="loadStock('${index.symbol}')" style="cursor:pointer;">
+                    <div class="index-name">${index.name}</div>
+                    <div class="index-price">${index.price.toLocaleString()}</div>
+                    <div class="index-change ${changeClass}">
+                        ${changeSign}${index.change} (${changeSign}${index.change_percent}%)
+                    </div>
                 </div>
             `;
-        }
+        });
+        
+        container.innerHTML = html;
     }
 
     // 搜索股票
